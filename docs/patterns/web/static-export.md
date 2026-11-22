@@ -6,14 +6,15 @@ runtime**.
 
 ## What that rules out
 
-| Not available                                              | Instead                                                                    |
-| ---------------------------------------------------------- | -------------------------------------------------------------------------- |
-| Server Actions (`'use server'`)                            | a call to the API through `@workspace/api-client` (lint error)             |
-| Route Handlers, `proxy.ts`                                 | the API                                                                    |
-| `next/headers`, `next/server`, `next/cache`, `server-only` | nothing: every module runs in the browser (lint error)                     |
-| redirects on the server                                    | a client gate (`RequireSession`) that calls `router.replace`               |
-| dynamic routes without known params                        | a query string: `/reset-password?token=...`, not `/reset-password/[token]` |
-| the image optimizer                                        | `images: { unoptimized: true }`                                            |
+| Not available                                              | Instead                                                                                             |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Server Actions (`'use server'`)                            | a call to the API through `@workspace/api-client` (lint error)                                      |
+| `proxy.ts`, Route Handlers that answer per request         | the API (a static GET Route Handler written at build time is fine: the share images of the landing) |
+| `next/headers`, `next/server`, `next/cache`, `server-only` | nothing: every module runs in the browser (lint error)                                              |
+| redirects on the server                                    | a client gate (`RequireSession`) that calls `router.replace`                                        |
+| a language detected and redirected on the server           | one page per language, chosen by the person ([i18n](./i18n.md))                                     |
+| dynamic routes without known params                        | a query string: `/reset-password?token=...`, not `/reset-password/[token]`                          |
+| the image optimizer                                        | `images: { unoptimized: true }`                                                                     |
 
 Pages are still React Server Components at build time: `page.tsx` exports `metadata` and renders a client screen
 (`'use client'`) that does the work in the browser.
@@ -26,7 +27,7 @@ Pages are still React Server Components at build time: `page.tsx` exports `metad
   either form; `normalizePath` treats them as the same place.
 - Environment values are read at **build time** and written into the bundle: `NEXT_PUBLIC_API_URL` (web),
   `SITE_URL` and `NEXT_PUBLIC_APP_URL` (landing). Build once per environment.
-- `robots.ts`, `sitemap.ts` and `opengraph-image.tsx` export `dynamic = 'force-static'`.
+- `robots.ts`, `sitemap.ts` and the `share.png/route.ts` of the landing export `dynamic = 'force-static'`.
 - The workspace packages are consumed as source: `transpilePackages` in `next.config.ts`, and `@source` in the CSS so
   Tailwind sees their class names.
 

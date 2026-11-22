@@ -35,6 +35,7 @@ context in the API and the notes screen in the web app are the reference impleme
 | [Layout](./web/layout.md)               | lay out a screen (read the first section before any grid)   |
 | [Scroll areas](./web/scroll-area.md)    | something may scroll or a row may not fit                   |
 | [Charts](./web/charts.md)               | show numbers as a chart                                     |
+| [Languages (i18n)](./web/i18n.md)       | translate the landing, add a key, a language or a page      |
 | [Testing the front](./web/testing.md)   | write a test of the front or take the screenshots           |
 
 ## The contract
