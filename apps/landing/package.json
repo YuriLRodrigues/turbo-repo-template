@@ -1,0 +1,48 @@
+{
+  "name": "landing",
+  "version": "0.1.0",
+  "description": "A minimal product page: Next.js static export with the design system, generic sections and basic SEO.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "next dev --port 3502",
+    "build": "next build && node tooling/fix-export.mjs",
+    "preview": "node tooling/serve-out.mjs",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
+    "typecheck": "next typegen && tsc --noEmit"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,mts,mjs}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
+  },
+  "dependencies": {
+    "@workspace/ui": "*",
+    "@workspace/utils": "*",
+    "geist": "1.9.2",
+    "lucide-react": "1.72.0",
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.5",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@workspace/config": "*",
+    "eslint": "10.14.0",
+    "prettier": "3.10.1",
+    "tailwindcss": "4.3.5",
+    "typescript": "6.0.3"
+  }
+}

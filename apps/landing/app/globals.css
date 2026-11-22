@@ -1,0 +1,12 @@
+@import 'tailwindcss';
+/* Tokens, base styles and materials: the page uses the same design system as the app. */
+@import '@workspace/ui/styles.css';
+@source '../../../packages/ui/src';
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* The sticky header must not cover the title of the section an anchor jumps to. */
+    scroll-padding-top: 5rem;
+  }
+}
