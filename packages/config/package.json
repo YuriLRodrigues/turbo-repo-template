@@ -1,0 +1,39 @@
+{
+  "name": "@workspace/config",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared ESLint, TypeScript and Prettier presets of the monorepo.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "./package.json": "./package.json",
+    "./eslint/nest": "./eslint/nest.mjs",
+    "./eslint/react": "./eslint/react.mjs",
+    "./eslint/node": "./eslint/node.mjs",
+    "./prettier": "./prettier/index.mjs",
+    "./typescript/*": "./typescript/*"
+  },
+  "scripts": {
+    "lint:check": "eslint .",
+    "lint": "eslint . --fix"
+  },
+  "dependencies": {
+    "@eslint/js": "10.0.1",
+    "eslint-config-next": "16.4.6",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-import-helpers": "2.0.2",
+    "eslint-plugin-prefer-arrow-functions": "3.10.2",
+    "eslint-plugin-prettier": "5.5.7",
+    "globals": "17.14.0",
+    "typescript-eslint": "8.72.2"
+  },
+  "peerDependencies": {
+    "eslint": "10.14.0",
+    "prettier": "3.10.1",
+    "typescript": "6.0.3"
+  },
+  "devDependencies": {
+    "eslint": "10.14.0",
+    "typescript": "6.0.3"
+  }
+}
