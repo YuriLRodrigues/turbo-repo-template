@@ -1,0 +1,15 @@
+{
+  "extends": "@workspace/config/typescript/nest.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "paths": {
+      "@core/*": ["./src/core/*"],
+      "@domain/*": ["./src/domain/*"],
+      "@infra/*": ["./src/infra/*"],
+      "@presentations/*": ["./src/presentations/*"],
+      "@test/*": ["./test/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts", "drizzle.config.ts", "vitest.config.mts"],
+  "exclude": ["node_modules", "dist"]
+}
