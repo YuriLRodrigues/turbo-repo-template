@@ -1,0 +1,15 @@
+@import 'tailwindcss';
+/* Tokens, base styles, the materials, the ScrollArea and the sidebar: everything visual lives in the design system. */
+@import '@workspace/ui/styles.css';
+/* The components of the design system are consumed as source: Tailwind has to see their class names. */
+@source '../../../packages/ui/src';
+
+/*
+ * App-level layout only. A color, a radius or a shadow never starts here: it is a token of @workspace/ui.
+ */
+@layer base {
+  html {
+    /* Room for the browser to paint under the notch and the home indicator; the shell adds the insets back. */
+    scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 1rem);
+  }
+}
