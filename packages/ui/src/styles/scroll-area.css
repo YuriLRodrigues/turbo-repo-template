@@ -1,0 +1,191 @@
+/*
+ * ScrollArea (components/scroll-area.tsx): the only scrolling box of the app. The native scrollbar is hidden and a
+ * thin thumb is drawn instead, visible only while scrolling and, with a mouse and a keyboard, while the pointer is
+ * over the box or the focus is inside it. The component writes data-overflow-*, data-scrolling and data-more.
+ */
+@layer components {
+  /* The box is a flex column and the viewport its only growing child: the viewport is sized by the layout (a fixed
+     height, a max-height or a parent that clamps the box), never by a percentage that needs a definite height. */
+  .scroll-area {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+  }
+  .scroll-area-viewport {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    border-radius: inherit;
+    scrollbar-width: none;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    --fade-start: 0px;
+    --fade-end: 0px;
+  }
+  .scroll-area-viewport::-webkit-scrollbar {
+    display: none;
+  }
+  .scroll-area[data-axis='x'] > .scroll-area-viewport {
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  .scroll-area[data-axis='y'] > .scroll-area-viewport {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  .scroll-area[data-axis='both'] > .scroll-area-viewport {
+    overflow: auto;
+  }
+  .scroll-area-viewport:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: -2px;
+  }
+
+  /* Edge fades: only on the side where more content is waiting. */
+  .scroll-area[data-fade][data-more~='left'] > .scroll-area-viewport,
+  .scroll-area[data-fade][data-more~='top'] > .scroll-area-viewport {
+    --fade-start: var(--scroll-fade, 1.75rem);
+  }
+  .scroll-area[data-fade][data-more~='right'] > .scroll-area-viewport,
+  .scroll-area[data-fade][data-more~='bottom'] > .scroll-area-viewport {
+    --fade-end: var(--scroll-fade, 1.75rem);
+  }
+  .scroll-area[data-fade][data-axis='x'] > .scroll-area-viewport {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black var(--fade-start),
+      black calc(100% - var(--fade-end)),
+      transparent
+    );
+  }
+  .scroll-area[data-fade]:not([data-axis='x']) > .scroll-area-viewport {
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      black var(--fade-start),
+      black calc(100% - var(--fade-end)),
+      transparent
+    );
+  }
+
+  .scroll-area-track {
+    position: absolute;
+    z-index: 2;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease-out;
+  }
+  .scroll-area-track-x {
+    inset: auto 6px 3px 6px;
+    height: 5px;
+  }
+  .scroll-area-track-y {
+    inset: 6px 3px 6px auto;
+    width: 5px;
+  }
+  .scroll-area-thumb {
+    display: block;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--foreground) 32%, transparent);
+    cursor: grab;
+    touch-action: none;
+    transition: background-color 0.2s ease-out;
+  }
+  .scroll-area-thumb:hover,
+  .scroll-area-thumb:active {
+    background: color-mix(in oklab, var(--foreground) 52%, transparent);
+  }
+  .scroll-area-track-x > .scroll-area-thumb {
+    height: 100%;
+  }
+  .scroll-area-track-y > .scroll-area-thumb {
+    width: 100%;
+  }
+  /* Everywhere: while it scrolls, and while the box itself has the keyboard focus (the arrow keys will scroll it). */
+  .scroll-area[data-overflow-x]:is([data-scrolling], :has(> .scroll-area-viewport:focus-visible))
+    > .scroll-area-track-x,
+  .scroll-area[data-overflow-y]:is([data-scrolling], :has(> .scroll-area-viewport:focus-visible))
+    > .scroll-area-track-y {
+    opacity: 1;
+    pointer-events: auto;
+    transition-duration: 0.12s;
+  }
+  /* With a mouse and a keyboard: also while the pointer is over the box or the focus is on something inside it.
+     Not on touch: there `:hover` stays on whatever was tapped last and a text field keeps `:focus-visible` while it
+     is being typed in, so the thumb would stay on screen with them. */
+  @media (hover: hover) and (pointer: fine) {
+    .scroll-area[data-overflow-x]:is(:hover, :has(:focus-visible)) > .scroll-area-track-x,
+    .scroll-area[data-overflow-y]:is(:hover, :has(:focus-visible)) > .scroll-area-track-y {
+      opacity: 1;
+      pointer-events: auto;
+      transition-duration: 0.12s;
+    }
+  }
+
+  /*
+   * ArrowScrollArea (components/arrow-scroll-area.tsx): one line of controls that is moved by two arrows laid over
+   * its faded edges, never by a visible bar.
+   *
+   * The box bleeds a little past its place (`--bleed-*`) and gives the same room back to the row as padding: the
+   * row cannot be seen outside the scrolling box, so focus rings and shadows need that room inside it. The arrows
+   * are centered on the row, not on the box.
+   */
+  .arrow-scroll-area {
+    --bleed-x: 0.375rem;
+    --bleed-top: 0.375rem;
+    --bleed-bottom: 0.375rem;
+    position: relative;
+    min-width: 0;
+    margin: calc(var(--bleed-top) * -1) calc(var(--bleed-x) * -1) calc(var(--bleed-bottom) * -1);
+  }
+  .arrow-scroll-area > .scroll-area > .scroll-area-viewport {
+    padding: var(--bleed-top) var(--bleed-x) var(--bleed-bottom);
+    /* The item brought into view by the keyboard stops short of the arrows. */
+    scroll-padding-inline: 2.5rem;
+    --scroll-fade: 2.75rem;
+  }
+  .arrow-scroll-area > .scroll-area > .scroll-area-viewport[data-dragging] {
+    cursor: grabbing;
+    scroll-behavior: auto;
+    user-select: none;
+  }
+
+  .arrow-scroll-button {
+    position: absolute;
+    top: calc(var(--bleed-top) + (100% - var(--bleed-top) - var(--bleed-bottom)) / 2);
+    z-index: 3;
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border-radius: 999px;
+    background-color: var(--popover);
+    box-shadow:
+      var(--elevation-sm),
+      inset 0 0 0 1px var(--well-ring);
+    color: var(--foreground);
+    cursor: pointer;
+    translate: 0 -50%;
+    transition:
+      opacity 0.2s ease-out,
+      scale 0.2s ease-out,
+      background-color 0.2s ease-out;
+  }
+  .arrow-scroll-button[data-direction='back'] {
+    left: 0;
+  }
+  .arrow-scroll-button[data-direction='forward'] {
+    right: 0;
+  }
+  .arrow-scroll-button:active {
+    scale: 0.92;
+  }
+  /* At an end: locked and faded out, still in the DOM. What is under it can be pressed. */
+  .arrow-scroll-button:disabled {
+    opacity: 0;
+    pointer-events: none;
+  }
+}

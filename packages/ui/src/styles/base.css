@@ -1,0 +1,86 @@
+/* Element defaults. Everything here is in the base layer, so a utility on the element always wins. */
+@layer base {
+  * {
+    border-color: var(--border);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-size-adjust: 100%;
+    /* The page itself never scrolls sideways; boxes that scroll are a <ScrollArea>. */
+    overflow-x: clip;
+  }
+
+  body {
+    min-height: 100svh;
+    background-color: var(--bg-base);
+    color: var(--foreground);
+    font-family: var(--app-font-sans);
+    font-feature-settings: 'ss01', 'cv11';
+    line-height: 1.5;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--primary) 30%, transparent);
+  }
+
+  /* One focus ring for everything that can take the keyboard. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  [role='radio'],
+  [role='tab'],
+  [role='switch'],
+  summary {
+    cursor: pointer;
+  }
+
+  /* Money and measurements line up in lists. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* While the look changes (appearance.ts), colors cross-fade instead of snapping. */
+:root[data-appearance-switching] *,
+:root[data-appearance-switching] *::before,
+:root[data-appearance-switching] *::after {
+  transition:
+    background-color 0.35s ease-out,
+    color 0.35s ease-out,
+    border-color 0.35s ease-out,
+    fill 0.35s ease-out,
+    stroke 0.35s ease-out,
+    box-shadow 0.35s ease-out !important;
+}
+
+/*
+ * Less motion: the same page, still. Transitions end at once, loops stop, nothing waits for an animation. It follows
+ * the system setting and the "reduce motion" switch of the appearance (`data-motion="reduced"` on <html>).
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+:root[data-motion='reduced'] *,
+:root[data-motion='reduced'] *::before,
+:root[data-motion='reduced'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  animation-delay: 0ms !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}

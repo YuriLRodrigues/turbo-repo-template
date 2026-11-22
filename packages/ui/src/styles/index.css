@@ -1,0 +1,14 @@
+/*
+ * The stylesheet of @workspace/ui. The app's CSS entry imports Tailwind first, then this file, and tells Tailwind to
+ * scan the package for class names:
+ *
+ *   @import 'tailwindcss';
+ *   @import '@workspace/ui/styles.css';
+ *   @source '../../../packages/ui/src';
+ */
+@import './tokens.css';
+@import './base.css';
+@import './motion.css';
+@import './surfaces.css';
+@import './scroll-area.css';
+@import './sidebar.css';

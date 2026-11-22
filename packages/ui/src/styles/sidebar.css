@@ -1,0 +1,174 @@
+/*
+ * The sidebar that opens and closes (components/sidebar.tsx). The state is on <html>, written before the first paint
+ * (lib/sidebar-state.ts), so everything here is plain CSS: nothing waits for React to be in the right place.
+ *
+ *   data-sidebar-state="expanded | collapsed"   labels, or a rail of icons
+ *   data-sidebar-mode="push | overlay"          from 1024px the content moves over; under it, the expanded sidebar
+ *                                               lies over the content
+ *   data-sidebar-motion="on"                    set after hydration: only then do changes animate, so the first
+ *                                               paint shows the final state and nothing moves on load
+ *   data-sidebar-instant                        for a couple of frames after Ctrl/⌘+B: the keyboard gets its
+ *                                               answer in the same frame, without animation
+ *
+ * The rhythm (a transition takes the timing of the state it is going to):
+ * - Opening takes 250ms and most of the width arrives early, so the names have room when they come in: they wait a
+ *   quarter of the time, then fade in with a short slide from the rail.
+ * - Closing takes 200ms (a toggle used often; nothing leaves the screen) and starts slowly: the names go out first,
+ *   by the same slide, while the panel is still almost whole. They are cut by the edge, never squeezed or wrapped.
+ * - Reduced motion: the width changes at once and the names only fade.
+ */
+@layer components {
+  :root {
+    --sidebar-rail: 4.5rem;
+    --sidebar-full: 16rem;
+    /* The distance from the edges of the screen: the sidebar floats. */
+    --sidebar-edge: 0.75rem;
+    --sidebar-ease: cubic-bezier(0.22, 0.8, 0.2, 1);
+    --sidebar-duration: 250ms;
+    --sidebar-width: var(--sidebar-full);
+    /* What the content gives way to. */
+    --sidebar-push: var(--sidebar-width);
+  }
+  :root[data-sidebar-state='collapsed'] {
+    --sidebar-width: var(--sidebar-rail);
+    --sidebar-ease: cubic-bezier(0.65, 0, 0.35, 1);
+    --sidebar-duration: 200ms;
+  }
+  :root[data-sidebar-mode='overlay'] {
+    --sidebar-push: var(--sidebar-rail);
+  }
+
+  .sidebar {
+    position: fixed;
+    top: var(--sidebar-edge);
+    bottom: var(--sidebar-edge);
+    left: var(--sidebar-edge);
+    z-index: 40;
+    display: none;
+    flex-direction: column;
+    width: var(--sidebar-width);
+  }
+  .sidebar-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 39;
+    display: none;
+    background-color: var(--scrim);
+    opacity: 0;
+    pointer-events: none;
+  }
+  @media (min-width: 768px) {
+    .sidebar {
+      display: flex;
+    }
+    .sidebar-scrim {
+      display: block;
+    }
+    .sidebar-inset {
+      padding-left: calc(var(--sidebar-edge) + var(--sidebar-push) + 1rem);
+    }
+  }
+  /* Over the content: what is behind steps back a little, and a press on it closes the sidebar. */
+  :root[data-sidebar-mode='overlay'][data-sidebar-state='expanded'] .sidebar-scrim {
+    opacity: 0.6;
+    pointer-events: auto;
+  }
+
+  /* The names: everything that is text in the sidebar. They never wrap while the width changes. */
+  .sidebar-label {
+    white-space: nowrap;
+  }
+  :root[data-sidebar-state='collapsed'] .sidebar-label {
+    opacity: 0;
+    translate: -0.375rem 0;
+  }
+  /* What must also leave the Tab order and the accessibility tree when collapsed (the link of the brand). A name
+     inside a link or a button only fades: hidden text would take the accessible name of the control with it. */
+  :root[data-sidebar-state='collapsed'] .sidebar-hide {
+    visibility: hidden;
+  }
+
+  /* A piece that gives its width back when collapsed: the name beside the "+". `0fr` to `1fr` animates between
+     nothing and the natural width, whatever that is. */
+  .sidebar-collapse {
+    display: grid;
+    min-width: 0;
+    grid-template-columns: 1fr;
+  }
+  .sidebar-collapse > * {
+    min-width: 0;
+    overflow: hidden;
+  }
+  :root[data-sidebar-state='collapsed'] .sidebar-collapse {
+    grid-template-columns: 0fr;
+  }
+
+  /* The main action: a full-width pill that becomes a round button. */
+  .sidebar-action {
+    width: 100%;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+  :root[data-sidebar-state='collapsed'] .sidebar-action {
+    max-width: 2.5rem;
+  }
+
+  /* The toggle says what a press will do: both icons are in the HTML and the state on <html> picks one, so the
+     first paint is already right. */
+  .sidebar-toggle-expand,
+  :root[data-sidebar-state='collapsed'] .sidebar-toggle-collapse {
+    display: none;
+  }
+  :root[data-sidebar-state='collapsed'] .sidebar-toggle-expand {
+    display: block;
+  }
+
+  /* ── Motion: only after hydration ─────────────────────────────────────────────────────────────────────────── */
+  :root[data-sidebar-motion='on'] .sidebar {
+    transition: width var(--sidebar-duration) var(--sidebar-ease);
+  }
+  :root[data-sidebar-motion='on'] .sidebar-inset {
+    transition: padding-left var(--sidebar-duration) var(--sidebar-ease);
+  }
+  :root[data-sidebar-motion='on'] .sidebar-scrim {
+    transition: opacity var(--sidebar-duration) ease-out;
+  }
+  :root[data-sidebar-motion='on'] .sidebar-collapse {
+    transition: grid-template-columns var(--sidebar-duration) var(--sidebar-ease);
+  }
+  :root[data-sidebar-motion='on'] .sidebar-action {
+    transition: max-width var(--sidebar-duration) var(--sidebar-ease);
+  }
+  :root[data-sidebar-motion='on'][data-sidebar-state='expanded'] .sidebar-label {
+    transition:
+      opacity calc(var(--sidebar-duration) * 0.6) ease-out calc(var(--sidebar-duration) * 0.25),
+      translate calc(var(--sidebar-duration) * 0.6) ease-out calc(var(--sidebar-duration) * 0.25),
+      visibility 0s;
+  }
+  /* Going out: `visibility` waits for the fade to end before it hides what must leave the Tab order. */
+  :root[data-sidebar-motion='on'][data-sidebar-state='collapsed'] .sidebar-label {
+    transition:
+      opacity calc(var(--sidebar-duration) * 0.5) ease-in,
+      translate calc(var(--sidebar-duration) * 0.5) ease-in,
+      visibility 0s linear calc(var(--sidebar-duration) * 0.5);
+  }
+
+  /* Reduced motion: the global rule (base.css) ends every transition, so the width simply changes. The names keep
+     a quick fade, without the slide: softer than a hard swap, and nothing moves. */
+  @media (prefers-reduced-motion: reduce) {
+    :root[data-sidebar-motion='on'][data-sidebar-state] .sidebar-label {
+      translate: none !important;
+      transition: opacity 120ms linear !important;
+    }
+  }
+
+  /* Ctrl/⌘+B: everything changes at once. After the reduced-motion rule, to win over its fade as well. */
+  :root[data-sidebar-instant] .sidebar,
+  :root[data-sidebar-instant] .sidebar *,
+  :root[data-sidebar-instant] .sidebar-inset,
+  :root[data-sidebar-instant] .sidebar-scrim,
+  :root[data-sidebar-instant][data-sidebar-motion='on'][data-sidebar-state] .sidebar-label {
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
+}

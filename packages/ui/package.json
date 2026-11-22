@@ -1,0 +1,59 @@
+{
+  "name": "@workspace/ui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The neutral design system of the monorepo: shadcn-style tokens on Tailwind v4, primitives, charts and the appearance store.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    "./package.json": "./package.json",
+    "./styles.css": "./src/styles/index.css",
+    "./appearance": "./src/appearance/index.ts",
+    "./components/*": "./src/components/*.tsx",
+    "./charts": "./src/charts/index.ts",
+    "./charts/*": "./src/charts/*.tsx",
+    "./hooks/*": "./src/hooks/*.ts",
+    "./lib/*": "./src/lib/*.ts"
+  },
+  "scripts": {
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "contrast": "node tooling/contrast-check.mjs"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,mts,mjs}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
+  },
+  "dependencies": {
+    "@base-ui/react": "1.9.0",
+    "@workspace/utils": "*",
+    "class-variance-authority": "0.7.1",
+    "lucide-react": "1.72.0",
+    "recharts": "3.10.1",
+    "sonner": "2.0.8"
+  },
+  "peerDependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@workspace/config": "*",
+    "eslint": "10.14.0",
+    "prettier": "3.10.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "typescript": "6.0.3"
+  }
+}

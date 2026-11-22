@@ -1,0 +1,343 @@
+/*
+ * Design tokens. Neutral on purpose: a grey scale, one accent the person picks, and the status colors. A product
+ * gives itself a face by changing these values (and the font), not the components.
+ *
+ * <html> carries the person's choices as attributes, written before the first paint by the appearance script (see
+ * src/appearance): data-theme (light | dark, already resolved), data-accent, data-density (comfortable | compact) and
+ * data-motion="reduced".
+ *
+ * Rules of this file (tooling/contrast-check.mjs parses it):
+ * - a color token is a literal `oklch(L C H)` or `oklch(L C H / A)`, or a `var(--other-token)`;
+ * - blocks are `:root` plus attribute selectors only, and the cascade is the source order;
+ * - components never use a raw color: they use the role (`text-muted-foreground`, `bg-primary`, `bg-card`).
+ *
+ * The names follow shadcn (`primary`, `muted`, `card`, `popover`...), so a component added with `shadcn add` lands on
+ * the same tokens. `primary` is the accent the person picked.
+ */
+
+@theme inline {
+  --font-sans: var(--app-font-sans);
+  --font-display: var(--app-font-display);
+  --font-mono: var(--app-font-mono);
+
+  --color-background: var(--bg-base);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-text: var(--primary-text);
+  --color-primary-soft: var(--primary-soft);
+  --color-secondary: var(--muted);
+  --color-secondary-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-hover: var(--muted-hover);
+  --color-raised: var(--raised);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--muted);
+  --color-accent-foreground: var(--foreground);
+  --color-success: var(--success);
+  --color-success-text: var(--success-text);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-text: var(--warning-text);
+  --color-warning-soft: var(--warning-soft);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-text: var(--destructive-text);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--border-strong);
+  --color-ring: var(--ring);
+  --color-scrim: var(--scrim);
+
+  /* The series of the charts (charts/palette.ts): the accent first, then four hues that read on both themes. */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-control: 0.625rem;
+  --radius-card: 0.875rem;
+  --radius-sheet: 1.25rem;
+
+  /* Elevation lives in --elevation-* (below) and becomes shadow-elevation-* here. Declaring --shadow-* in :root would
+     be a circular reference: in Tailwind 4 that name is already the end of the utility. */
+  --shadow-elevation-sm: var(--elevation-sm);
+  --shadow-elevation: var(--elevation-md);
+  --shadow-elevation-lg: var(--elevation-lg);
+  --shadow-elevation-xl: var(--elevation-xl);
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0, 0.35, 1);
+  /* A spring that overshoots once: the sliding indicators, the switch thumb. */
+  --ease-spring: linear(
+    0,
+    0.009,
+    0.035 2.1%,
+    0.141 4.4%,
+    0.723 12.9%,
+    0.938 16.7%,
+    1.017,
+    1.077,
+    1.121,
+    1.149 24.3%,
+    1.159,
+    1.163,
+    1.161,
+    1.154 29.9%,
+    1.129 32.8%,
+    1.051 39.6%,
+    1.017 43.1%,
+    0.991,
+    0.977 51%,
+    0.974 53.8%,
+    0.975 57.1%,
+    0.997 69.8%,
+    1.003 76.9%,
+    1.004 83.8%,
+    1
+  );
+
+  --animate-rise-in: rise-in 0.5s var(--ease-out-expo) both;
+  --animate-fade-in: fade-in 0.3s ease-out both;
+  --animate-shimmer: shimmer 1.8s linear infinite;
+  --animate-spin-slow: spin 1.1s linear infinite;
+  --animate-progress-grow: progress-grow 0.9s var(--ease-out-expo) both;
+
+  @keyframes rise-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  /* A bar that fills from the left: the element keeps its final `scale` and starts from zero. */
+  @keyframes progress-grow {
+    from {
+      scale: 0 1;
+    }
+  }
+  @keyframes shimmer {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
+}
+
+/* Dark mode is the resolved `data-theme` on <html>. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/* ── Theme: light ─────────────────────────────────────────────────────────────────────────────────────────────── */
+:root {
+  color-scheme: light;
+
+  --app-font-sans: var(--font-geist-sans, ui-sans-serif), ui-sans-serif, system-ui, sans-serif;
+  --app-font-display: var(--app-font-sans);
+  --app-font-mono: var(--font-geist-mono, ui-monospace), ui-monospace, monospace;
+
+  --bg-base: oklch(0.985 0 0);
+  --foreground: oklch(0.17 0 0);
+  --muted-foreground: oklch(0.49 0 0);
+
+  --card: oklch(1 0 0);
+  --popover: oklch(1 0 0);
+
+  /* Wells: segmented tracks, inputs, the tiles inside a card. A slightly different fill and a faint hairline. */
+  --muted: oklch(0.17 0 0 / 0.05);
+  --muted-hover: oklch(0.17 0 0 / 0.09);
+  --well-ring: oklch(0.17 0 0 / 0.07);
+  /* The opposite of a well: what stands out of a surface (the thumb of a segmented control, the active tab). */
+  --raised: oklch(1 0 0);
+
+  --border: oklch(0.92 0 0);
+  --border-strong: oklch(0.86 0 0);
+  --ring: var(--primary);
+  --scrim: oklch(0.17 0 0 / 0.4);
+
+  --success: oklch(0.6 0.15 152);
+  --success-text: oklch(0.45 0.12 152);
+  --success-soft: oklch(0.6 0.15 152 / 0.12);
+  --warning: oklch(0.77 0.16 75);
+  --warning-text: oklch(0.48 0.11 60);
+  --warning-soft: oklch(0.77 0.16 75 / 0.16);
+  --destructive: oklch(0.55 0.22 27);
+  --destructive-foreground: oklch(0.99 0 0);
+  --destructive-text: oklch(0.5 0.2 27);
+  --destructive-soft: oklch(0.55 0.22 27 / 0.1);
+
+  --chart-1: var(--primary);
+  --chart-2: oklch(0.6 0.13 200);
+  --chart-3: oklch(0.65 0.15 150);
+  --chart-4: oklch(0.72 0.15 75);
+  --chart-5: oklch(0.6 0.18 330);
+
+  --skeleton: oklch(0.17 0 0 / 0.06);
+  --skeleton-shine: oklch(1 0 0 / 0.7);
+
+  --elevation-sm: 0 1px 2px 0 oklch(0 0 0 / 0.05);
+  --elevation-md: 0 1px 2px 0 oklch(0 0 0 / 0.04), 0 4px 12px -2px oklch(0 0 0 / 0.08);
+  --elevation-lg: 0 2px 4px 0 oklch(0 0 0 / 0.04), 0 12px 32px -8px oklch(0 0 0 / 0.16);
+  --elevation-xl: 0 4px 8px 0 oklch(0 0 0 / 0.05), 0 24px 56px -12px oklch(0 0 0 / 0.24);
+}
+
+/* ── Theme: dark ──────────────────────────────────────────────────────────────────────────────────────────────── */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg-base: oklch(0.15 0 0);
+  --foreground: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.72 0 0);
+
+  --card: oklch(0.19 0 0);
+  --popover: oklch(0.22 0 0);
+
+  --muted: oklch(1 0 0 / 0.06);
+  --muted-hover: oklch(1 0 0 / 0.1);
+  --well-ring: oklch(1 0 0 / 0.07);
+  --raised: oklch(0.3 0 0);
+
+  --border: oklch(1 0 0 / 0.1);
+  --border-strong: oklch(1 0 0 / 0.17);
+  --scrim: oklch(0 0 0 / 0.6);
+
+  --success: oklch(0.7 0.15 152);
+  --success-text: oklch(0.8 0.13 152);
+  --success-soft: oklch(0.7 0.15 152 / 0.16);
+  --warning: oklch(0.8 0.15 80);
+  --warning-text: oklch(0.85 0.12 85);
+  --warning-soft: oklch(0.8 0.15 80 / 0.16);
+  --destructive: oklch(0.55 0.2 25);
+  --destructive-foreground: oklch(0.99 0 0);
+  --destructive-text: oklch(0.76 0.15 25);
+  --destructive-soft: oklch(0.55 0.2 25 / 0.2);
+
+  --chart-2: oklch(0.72 0.12 200);
+  --chart-3: oklch(0.74 0.14 150);
+  --chart-4: oklch(0.8 0.14 80);
+  --chart-5: oklch(0.72 0.16 330);
+
+  --skeleton: oklch(1 0 0 / 0.07);
+  --skeleton-shine: oklch(1 0 0 / 0.1);
+
+  --elevation-sm: 0 1px 2px 0 oklch(0 0 0 / 0.4);
+  --elevation-md: 0 1px 2px 0 oklch(0 0 0 / 0.4), 0 4px 12px -2px oklch(0 0 0 / 0.5);
+  --elevation-lg: 0 2px 4px 0 oklch(0 0 0 / 0.4), 0 12px 32px -8px oklch(0 0 0 / 0.6);
+  --elevation-xl: 0 4px 8px 0 oklch(0 0 0 / 0.45), 0 24px 56px -12px oklch(0 0 0 / 0.7);
+}
+
+/* ── Accents ──────────────────────────────────────────────────────────────────────────────────────────────────── */
+/*
+ * `primary` fills (buttons, the switch), `primary-text` is the accent as text on a surface, `primary-soft` a tint.
+ * `data-accent-preview` scopes an accent to one element (the swatches of the appearance controls), so a swatch shows
+ * the real `primary` of its accent in the current theme.
+ */
+:root,
+[data-accent-preview='neutral'] {
+  --primary: oklch(0.21 0 0);
+  --primary-foreground: oklch(0.98 0 0);
+  --primary-text: oklch(0.21 0 0);
+  --primary-soft: oklch(0.21 0 0 / 0.07);
+}
+:root[data-accent='blue'],
+[data-accent-preview='blue'] {
+  --primary: oklch(0.53 0.2 262);
+  --primary-foreground: oklch(0.99 0 0);
+  --primary-text: oklch(0.5 0.2 262);
+  --primary-soft: oklch(0.53 0.2 262 / 0.1);
+}
+:root[data-accent='violet'],
+[data-accent-preview='violet'] {
+  --primary: oklch(0.52 0.22 293);
+  --primary-foreground: oklch(0.99 0 0);
+  --primary-text: oklch(0.5 0.22 293);
+  --primary-soft: oklch(0.52 0.22 293 / 0.1);
+}
+:root[data-accent='emerald'],
+[data-accent-preview='emerald'] {
+  --primary: oklch(0.5 0.12 162);
+  --primary-foreground: oklch(0.99 0 0);
+  --primary-text: oklch(0.46 0.11 162);
+  --primary-soft: oklch(0.5 0.12 162 / 0.11);
+}
+:root[data-accent='amber'],
+[data-accent-preview='amber'] {
+  --primary: oklch(0.79 0.16 75);
+  --primary-foreground: oklch(0.22 0.04 60);
+  --primary-text: oklch(0.48 0.11 60);
+  --primary-soft: oklch(0.79 0.16 75 / 0.18);
+}
+:root[data-accent='rose'],
+[data-accent-preview='rose'] {
+  --primary: oklch(0.54 0.21 12);
+  --primary-foreground: oklch(0.99 0 0);
+  --primary-text: oklch(0.51 0.2 12);
+  --primary-soft: oklch(0.54 0.21 12 / 0.1);
+}
+
+:root[data-theme='dark'],
+[data-theme='dark'] [data-accent-preview='neutral'] {
+  --primary: oklch(0.93 0 0);
+  --primary-foreground: oklch(0.18 0 0);
+  --primary-text: oklch(0.93 0 0);
+  --primary-soft: oklch(1 0 0 / 0.09);
+}
+:root[data-theme='dark'][data-accent='blue'],
+[data-theme='dark'] [data-accent-preview='blue'] {
+  --primary: oklch(0.72 0.15 262);
+  --primary-foreground: oklch(0.16 0.03 262);
+  --primary-text: oklch(0.78 0.13 262);
+  --primary-soft: oklch(0.72 0.15 262 / 0.18);
+}
+:root[data-theme='dark'][data-accent='violet'],
+[data-theme='dark'] [data-accent-preview='violet'] {
+  --primary: oklch(0.73 0.16 293);
+  --primary-foreground: oklch(0.16 0.03 293);
+  --primary-text: oklch(0.79 0.14 293);
+  --primary-soft: oklch(0.73 0.16 293 / 0.18);
+}
+:root[data-theme='dark'][data-accent='emerald'],
+[data-theme='dark'] [data-accent-preview='emerald'] {
+  --primary: oklch(0.75 0.14 162);
+  --primary-foreground: oklch(0.17 0.03 162);
+  --primary-text: oklch(0.8 0.13 162);
+  --primary-soft: oklch(0.75 0.14 162 / 0.16);
+}
+:root[data-theme='dark'][data-accent='amber'],
+[data-theme='dark'] [data-accent-preview='amber'] {
+  --primary: oklch(0.82 0.15 78);
+  --primary-foreground: oklch(0.2 0.04 60);
+  --primary-text: oklch(0.85 0.13 80);
+  --primary-soft: oklch(0.82 0.15 78 / 0.16);
+}
+:root[data-theme='dark'][data-accent='rose'],
+[data-theme='dark'] [data-accent-preview='rose'] {
+  --primary: oklch(0.72 0.16 12);
+  --primary-foreground: oklch(0.17 0.04 12);
+  --primary-text: oklch(0.79 0.13 12);
+  --primary-soft: oklch(0.72 0.16 12 / 0.18);
+}
+
+/* ── Density ──────────────────────────────────────────────────────────────────────────────────────────────────── */
+/* Tailwind's spacing scale is `calc(var(--spacing) * n)`: a smaller unit tightens every gap and padding at once. */
+:root[data-density='compact'] {
+  --spacing: 0.22rem;
+}

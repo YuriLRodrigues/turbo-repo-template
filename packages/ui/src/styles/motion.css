@@ -1,0 +1,16 @@
+/*
+ * Keyframes used by name from components (the ones behind an `animate-*` utility live in the @theme block of
+ * tokens.css). Reduced motion is handled once, in base.css.
+ */
+
+/* A page arriving (apps/web: app/(app)/template.tsx). */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
