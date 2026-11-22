@@ -1,0 +1,16 @@
+node_modules
+dist
+coverage
+.turbo
+.next
+out
+next-env.d.ts
+package-lock.json
+test-results
+playwright-report
+.pglite
+
+# generated: drizzle-kit writes the migrations, the API export writes openapi.json, Orval writes src/gen
+apps/api/drizzle
+apps/api/openapi.json
+packages/api-client/src/gen

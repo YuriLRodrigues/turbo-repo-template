@@ -1,0 +1,58 @@
+{
+  "name": "turbo-repo-template",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Full-stack monorepo template: NestJS + Drizzle API (clean architecture), Next.js static-export web app, landing page, a neutral shadcn design system and an Orval-generated API client, on Turborepo and npm workspaces.",
+  "license": "MIT",
+  "packageManager": "npm@12.2.2",
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev --filter=api --filter=web",
+    "dev:api": "turbo run dev --filter=api",
+    "dev:web": "turbo run dev --filter=web",
+    "dev:landing": "turbo run dev --filter=landing",
+    "build": "turbo run build",
+    "preview": "npm run preview -w web",
+    "preview:landing": "npm run preview -w landing",
+    "lint": "turbo run lint",
+    "lint:check": "turbo run lint:check",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "contrast": "npm run contrast -w @workspace/ui",
+    "api:openapi": "npm run docs:openapi -w api",
+    "api:client": "npm run gen -w @workspace/api-client",
+    "db:generate": "npm run db:generate -w api --",
+    "db:migrate": "npm run db:migrate -w api",
+    "db:studio": "npm run db:studio -w api",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "@commitlint/cli": "21.2.4",
+    "@commitlint/config-conventional": "21.2.4",
+    "eslint": "10.14.0",
+    "husky": "9.1.7",
+    "lint-staged": "17.6.0",
+    "prettier": "3.10.1",
+    "prettier-plugin-tailwindcss": "0.8.1",
+    "turbo": "2.11.11",
+    "typescript": "6.0.3"
+  },
+  "overrides": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0"
+  }
+}
