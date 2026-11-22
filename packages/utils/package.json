@@ -1,0 +1,42 @@
+{
+  "name": "@workspace/utils",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pure helpers shared by the apps: class names, money, numbers and dates. No React, no DOM.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./package.json": "./package.json",
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "lint-staged": {
+    "*.{ts,mts,mjs}": [
+      "prettier --write",
+      "eslint --fix",
+      "vitest related --run --passWithNoTests"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
+  "dependencies": {
+    "clsx": "2.1.1",
+    "tailwind-merge": "3.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "@workspace/config": "*",
+    "eslint": "10.14.0",
+    "prettier": "3.10.1",
+    "typescript": "6.0.3",
+    "vitest": "5.1.0"
+  }
+}

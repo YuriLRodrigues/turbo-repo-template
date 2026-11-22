@@ -1,0 +1,7 @@
+{
+  "extends": "@workspace/config/typescript/node.json",
+  "compilerOptions": {
+    "lib": ["es2023"]
+  },
+  "include": ["src/**/*.ts", "vitest.config.mts"]
+}
