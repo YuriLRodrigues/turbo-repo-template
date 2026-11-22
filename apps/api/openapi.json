@@ -1,0 +1,2003 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": { "application/json": { "schema": { "example": { "status": "ok" } } } }
+          }
+        },
+        "summary": "Liveness probe",
+        "tags": ["health"]
+      }
+    },
+    "/auth/sign-up": {
+      "post": {
+        "description": "Rules 1.1 and 1.2. Creates the account and sends the link that confirms the e-mail (valid for 24 hours). The person can use the app before confirming. Sign in afterwards with `POST /auth/sign-in`.",
+        "operationId": "signUp",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SignUpDto" } } }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserResponseDto" } } }
+          },
+          "400": {
+            "description": "`VALIDATION.FAILED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "VALIDATION.FAILED": {
+                    "value": {
+                      "statusCode": 400,
+                      "code": "VALIDATION.FAILED",
+                      "message": "Request validation failed.",
+                      "details": { "errors": ["property admin should not exist"] }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`USER.EMAIL_IN_USE`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "USER.EMAIL_IN_USE": {
+                    "value": {
+                      "statusCode": 409,
+                      "code": "USER.EMAIL_IN_USE",
+                      "message": "This e-mail address is already registered."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`USER.INVALID_NAME` or `USER.INVALID_EMAIL` or `USER.WEAK_PASSWORD`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "USER.INVALID_NAME": {
+                    "value": {
+                      "statusCode": 422,
+                      "code": "USER.INVALID_NAME",
+                      "message": "The name must have between 1 and 60 characters.",
+                      "details": { "maxLength": 60 }
+                    }
+                  },
+                  "USER.INVALID_EMAIL": {
+                    "value": {
+                      "statusCode": 422,
+                      "code": "USER.INVALID_EMAIL",
+                      "message": "The e-mail address is not valid."
+                    }
+                  },
+                  "USER.WEAK_PASSWORD": {
+                    "value": {
+                      "statusCode": 422,
+                      "code": "USER.WEAK_PASSWORD",
+                      "message": "The password must have at least 8 characters.",
+                      "details": { "minLength": 8 }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "`HTTP.TOO_MANY_REQUESTS`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.TOO_MANY_REQUESTS": {
+                    "value": {
+                      "statusCode": 429,
+                      "code": "HTTP.TOO_MANY_REQUESTS",
+                      "message": "ThrottlerException: Too Many Requests"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create an account",
+        "tags": ["auth"]
+      }
+    },
+    "/auth/sign-in": {
+      "post": {
+        "description": "Rules 1.3 and 1.4. Answers a short access token (15 minutes) and starts a session with a rotating refresh token (30 days). On the web the refresh token is set as an httpOnly cookie; a native app sends `x-auth-transport: token` and receives it in the body. A wrong password and an e-mail without an account get the same answer. Five wrong passwords for an e-mail in 15 minutes block it for 15 minutes.",
+        "operationId": "signIn",
+        "parameters": [
+          {
+            "name": "x-auth-transport",
+            "in": "header",
+            "description": "Send `token` from a native app: the refresh token then comes in the response body instead of the httpOnly cookie. Leave it out on the web.",
+            "required": false,
+            "schema": { "type": "string", "enum": ["token"] }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SignInDto" } } }
+        },
+        "responses": {
+          "200": {
+            "headers": {
+              "Set-Cookie": {
+                "description": "Default transport only: `app.refresh_token=<refresh token>; HttpOnly; Path=/auth; SameSite=<configured>; Secure (in production); Expires=<30 days>`.",
+                "schema": { "type": "string" }
+              }
+            },
+            "description": "",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SessionTokensResponseDto" } } }
+          },
+          "400": {
+            "description": "`VALIDATION.FAILED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "VALIDATION.FAILED": {
+                    "value": {
+                      "statusCode": 400,
+                      "code": "VALIDATION.FAILED",
+                      "message": "Request validation failed.",
+                      "details": { "errors": ["property admin should not exist"] }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`AUTH.INVALID_CREDENTIALS`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "AUTH.INVALID_CREDENTIALS": {
+                    "value": {
+                      "statusCode": 401,
+                      "code": "AUTH.INVALID_CREDENTIALS",
+                      "message": "E-mail or password is incorrect."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`HTTP.FORBIDDEN`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.FORBIDDEN": {
+                    "value": { "statusCode": 403, "code": "HTTP.FORBIDDEN", "message": "Forbidden resource" }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "`AUTH.TOO_MANY_ATTEMPTS` or `HTTP.TOO_MANY_REQUESTS`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "AUTH.TOO_MANY_ATTEMPTS": {
+                    "value": {
+                      "statusCode": 429,
+                      "code": "AUTH.TOO_MANY_ATTEMPTS",
+                      "message": "Too many sign-in attempts. Try again later.",
+                      "details": { "retryAfterSeconds": 840 }
+                    }
+                  },
+                  "HTTP.TOO_MANY_REQUESTS": {
+                    "value": {
+                      "statusCode": 429,
+                      "code": "HTTP.TOO_MANY_REQUESTS",
+                      "message": "ThrottlerException: Too Many Requests"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Sign in",
+        "tags": ["auth"]
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "description": "Rule 1.3. Exchanges the refresh token for a new access token and a new refresh token. A refresh token works once: sending one that was already exchanged ends the whole session (`AUTH.REFRESH_TOKEN_REUSED`). Call it when a request answers 401, one refresh at a time, then repeat the request.",
+        "operationId": "refreshSession",
+        "parameters": [
+          {
+            "name": "x-auth-transport",
+            "in": "header",
+            "description": "Send `token` from a native app: the refresh token then comes in the response body instead of the httpOnly cookie. Leave it out on the web.",
+            "required": false,
+            "schema": { "type": "string", "enum": ["token"] }
+          },
+          {
+            "name": "x-refresh-token",
+            "in": "header",
+            "description": "With `x-auth-transport: token`: the refresh token. Otherwise it is read from the cookie.",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "headers": {
+              "Set-Cookie": {
+                "description": "Default transport only: `app.refresh_token=<refresh token>; HttpOnly; Path=/auth; SameSite=<configured>; Secure (in production); Expires=<30 days>`.",
+                "schema": { "type": "string" }
+              }
+            },
+            "description": "",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SessionTokensResponseDto" } } }
+          },
+          "401": {
+            "description": "`AUTH.REFRESH_TOKEN_INVALID` or `AUTH.REFRESH_TOKEN_EXPIRED` or `AUTH.REFRESH_TOKEN_REUSED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "AUTH.REFRESH_TOKEN_INVALID": {
+                    "value": {
+                      "statusCode": 401,
+                      "code": "AUTH.REFRESH_TOKEN_INVALID",
+                      "message": "The session is not valid. Sign in again."
+                    }
+                  },
+                  "AUTH.REFRESH_TOKEN_EXPIRED": {
+                    "value": {
+                      "statusCode": 401,
+                      "code": "AUTH.REFRESH_TOKEN_EXPIRED",
+                      "message": "The session has expired. Sign in again."
+                    }
+                  },
+                  "AUTH.REFRESH_TOKEN_REUSED": {
+                    "value": {
+                      "statusCode": 401,
+                      "code": "AUTH.REFRESH_TOKEN_REUSED",
+                      "message": "This session was ended for safety. Sign in again."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`HTTP.FORBIDDEN`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.FORBIDDEN": {
+                    "value": { "statusCode": 403, "code": "HTTP.FORBIDDEN", "message": "Forbidden resource" }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "`HTTP.TOO_MANY_REQUESTS`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.TOO_MANY_REQUESTS": {
+                    "value": {
+                      "statusCode": 429,
+                      "code": "HTTP.TOO_MANY_REQUESTS",
+                      "message": "ThrottlerException: Too Many Requests"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Renew the session",
+        "tags": ["auth"]
+      }
+    },
+    "/auth/sign-out": {
+      "post": {
+        "description": "Rule 1.3. Ends the session of the refresh token and clears the cookie. It needs no access token and never fails: without a refresh token, or with one that is unknown or already ended, the answer is the same 204.",
+        "operationId": "signOut",
+        "parameters": [
+          {
+            "name": "x-auth-transport",
+            "in": "header",
+            "description": "Send `token` from a native app: the refresh token then comes in the response body instead of the httpOnly cookie. Leave it out on the web.",
+            "required": false,
+            "schema": { "type": "string", "enum": ["token"] }
+          },
+          {
+            "name": "x-refresh-token",
+            "in": "header",
+            "description": "With `x-auth-transport: token`: the refresh token. Otherwise it is read from the cookie.",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "204": { "description": "Signed out." },
+          "403": {
+            "description": "`HTTP.FORBIDDEN`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.FORBIDDEN": {
+                    "value": { "statusCode": 403, "code": "HTTP.FORBIDDEN", "message": "Forbidden resource" }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "`HTTP.TOO_MANY_REQUESTS`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.TOO_MANY_REQUESTS": {
+                    "value": {
+                      "statusCode": 429,
+                      "code": "HTTP.TOO_MANY_REQUESTS",
+                      "message": "ThrottlerException: Too Many Requests"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Sign out",
+        "tags": ["auth"]
+      }
+    },
+    "/auth/verify-email": {
+      "post": {
+        "description": "Rule 1.2. The page the e-mail link opens (`/verify-email?token=...` in the web app) sends the token here. The link works once and for 24 hours; a newer link replaces the older ones.",
+        "operationId": "verifyEmail",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/VerifyEmailDto" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "The account, now with `emailVerified: true`.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserResponseDto" } } }
+          },
+          "400": {
+            "description": "`VALIDATION.FAILED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "VALIDATION.FAILED": {
+                    "value": {
+                      "statusCode": 400,
+                      "code": "VALIDATION.FAILED",
+                      "message": "Request validation failed.",
+                      "details": { "errors": ["property admin should not exist"] }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`AUTH.VERIFICATION_TOKEN_INVALID` or `AUTH.VERIFICATION_TOKEN_EXPIRED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "AUTH.VERIFICATION_TOKEN_INVALID": {
+                    "value": {
+                      "statusCode": 422,
+                      "code": "AUTH.VERIFICATION_TOKEN_INVALID",
+                      "message": "This confirmation link is not valid. Ask for a new one."
+                    }
+                  },
+                  "AUTH.VERIFICATION_TOKEN_EXPIRED": {
+                    "value": {
+                      "statusCode": 422,
+                      "code": "AUTH.VERIFICATION_TOKEN_EXPIRED",
+                      "message": "This confirmation link has expired. Ask for a new one."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "`HTTP.TOO_MANY_REQUESTS`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.TOO_MANY_REQUESTS": {
+                    "value": {
+                      "statusCode": 429,
+                      "code": "HTTP.TOO_MANY_REQUESTS",
+                      "message": "ThrottlerException: Too Many Requests"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Confirm the e-mail",
+        "tags": ["auth"]
+      }
+    },
+    "/auth/verify-email/resend": {
+      "post": {
+        "description": "Rule 1.2. For the signed-in person, at most once per minute. The new link replaces the previous one.",
+        "operationId": "resendEmailVerification",
+        "parameters": [],
+        "responses": {
+          "204": { "description": "The e-mail is on its way." },
+          "401": {
+            "description": "`HTTP.UNAUTHORIZED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.UNAUTHORIZED": {
+                    "value": { "statusCode": 401, "code": "HTTP.UNAUTHORIZED", "message": "Unauthorized" }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`USER.NOT_FOUND`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "USER.NOT_FOUND": {
+                    "value": { "statusCode": 404, "code": "USER.NOT_FOUND", "message": "User not found." }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`AUTH.EMAIL_ALREADY_VERIFIED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "AUTH.EMAIL_ALREADY_VERIFIED": {
+                    "value": {
+                      "statusCode": 409,
+                      "code": "AUTH.EMAIL_ALREADY_VERIFIED",
+                      "message": "This e-mail address is already confirmed."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "`AUTH.VERIFICATION_RESEND_TOO_SOON`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "AUTH.VERIFICATION_RESEND_TOO_SOON": {
+                    "value": {
+                      "statusCode": 429,
+                      "code": "AUTH.VERIFICATION_RESEND_TOO_SOON",
+                      "message": "The confirmation e-mail was sent a moment ago. Wait before asking again.",
+                      "details": { "retryAfterSeconds": 40 }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Send the confirmation e-mail again",
+        "tags": ["auth"]
+      }
+    },
+    "/auth/forgot-password": {
+      "post": {
+        "description": "Rule 1.5. Always answers 204: \"if the e-mail exists, we sent the link\". The link is single use and valid for 1 hour. An address gets at most one e-mail per minute.",
+        "operationId": "requestPasswordReset",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ForgotPasswordDto" } } }
+        },
+        "responses": {
+          "204": { "description": "If the e-mail has an account, the link was sent." },
+          "400": {
+            "description": "`VALIDATION.FAILED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "VALIDATION.FAILED": {
+                    "value": {
+                      "statusCode": 400,
+                      "code": "VALIDATION.FAILED",
+                      "message": "Request validation failed.",
+                      "details": { "errors": ["property admin should not exist"] }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "`HTTP.TOO_MANY_REQUESTS`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.TOO_MANY_REQUESTS": {
+                    "value": {
+                      "statusCode": 429,
+                      "code": "HTTP.TOO_MANY_REQUESTS",
+                      "message": "ThrottlerException: Too Many Requests"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Ask for a link to choose a new password",
+        "tags": ["auth"]
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "description": "Rule 1.5. The page the e-mail link opens (`/reset-password?token=...` in the web app) sends the token and the new password here. Every session of the person ends: sign in again with the new password.",
+        "operationId": "resetPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ResetPasswordDto" } } }
+        },
+        "responses": {
+          "204": { "description": "The password was changed and every session was ended." },
+          "400": {
+            "description": "`VALIDATION.FAILED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "VALIDATION.FAILED": {
+                    "value": {
+                      "statusCode": 400,
+                      "code": "VALIDATION.FAILED",
+                      "message": "Request validation failed.",
+                      "details": { "errors": ["property admin should not exist"] }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`AUTH.PASSWORD_RESET_TOKEN_INVALID` or `AUTH.PASSWORD_RESET_TOKEN_EXPIRED` or `USER.WEAK_PASSWORD`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "AUTH.PASSWORD_RESET_TOKEN_INVALID": {
+                    "value": {
+                      "statusCode": 422,
+                      "code": "AUTH.PASSWORD_RESET_TOKEN_INVALID",
+                      "message": "This password link is not valid. Ask for a new one."
+                    }
+                  },
+                  "AUTH.PASSWORD_RESET_TOKEN_EXPIRED": {
+                    "value": {
+                      "statusCode": 422,
+                      "code": "AUTH.PASSWORD_RESET_TOKEN_EXPIRED",
+                      "message": "This password link has expired. Ask for a new one."
+                    }
+                  },
+                  "USER.WEAK_PASSWORD": {
+                    "value": {
+                      "statusCode": 422,
+                      "code": "USER.WEAK_PASSWORD",
+                      "message": "The password must have at least 8 characters.",
+                      "details": { "minLength": 8 }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "`HTTP.TOO_MANY_REQUESTS`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.TOO_MANY_REQUESTS": {
+                    "value": {
+                      "statusCode": 429,
+                      "code": "HTTP.TOO_MANY_REQUESTS",
+                      "message": "ThrottlerException: Too Many Requests"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Choose a new password",
+        "tags": ["auth"]
+      }
+    },
+    "/me": {
+      "get": {
+        "operationId": "getMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserResponseDto" } } }
+          },
+          "401": {
+            "description": "`HTTP.UNAUTHORIZED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.UNAUTHORIZED": {
+                    "value": { "statusCode": 401, "code": "HTTP.UNAUTHORIZED", "message": "Unauthorized" }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`USER.NOT_FOUND`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "USER.NOT_FOUND": {
+                    "value": { "statusCode": 404, "code": "USER.NOT_FOUND", "message": "User not found." }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "The signed-in person",
+        "tags": ["me"]
+      }
+    },
+    "/me/preferences": {
+      "get": {
+        "description": "Rule 1.7: appearance, time zone, order of the home blocks, reminders and the state of the welcome step-by-step. A person who never changed anything gets the defaults.",
+        "operationId": "getPreferences",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PreferencesResponseDto" } } }
+          },
+          "401": {
+            "description": "`HTTP.UNAUTHORIZED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.UNAUTHORIZED": {
+                    "value": { "statusCode": 401, "code": "HTTP.UNAUTHORIZED", "message": "Unauthorized" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "My preferences",
+        "tags": ["me"]
+      },
+      "patch": {
+        "description": "Rule 1.7. Only what is sent changes, at every level: `{ \"appearance\": { \"theme\": \"dark\" } }` keeps the accent and everything else. Either every change in the request is applied or none is.",
+        "operationId": "updatePreferences",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdatePreferencesDto" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "The preferences after the change.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/PreferencesResponseDto" } } }
+          },
+          "400": {
+            "description": "`VALIDATION.FAILED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "VALIDATION.FAILED": {
+                    "value": {
+                      "statusCode": 400,
+                      "code": "VALIDATION.FAILED",
+                      "message": "Request validation failed.",
+                      "details": { "errors": ["property admin should not exist"] }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`HTTP.UNAUTHORIZED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.UNAUTHORIZED": {
+                    "value": { "statusCode": 401, "code": "HTTP.UNAUTHORIZED", "message": "Unauthorized" }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`PREFERENCES.INVALID_APPEARANCE` or `PREFERENCES.INVALID_TIME_ZONE` or `PREFERENCES.INVALID_ONBOARDING`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "PREFERENCES.INVALID_APPEARANCE": {
+                    "value": {
+                      "statusCode": 422,
+                      "code": "PREFERENCES.INVALID_APPEARANCE",
+                      "message": "The appearance option \"accent\" is not valid.",
+                      "details": {
+                        "field": "accent",
+                        "allowed": ["neutral", "blue", "violet", "emerald", "amber", "rose"]
+                      }
+                    }
+                  },
+                  "PREFERENCES.INVALID_TIME_ZONE": {
+                    "value": {
+                      "statusCode": 422,
+                      "code": "PREFERENCES.INVALID_TIME_ZONE",
+                      "message": "The time zone is not valid. Use an IANA name such as Europe/Lisbon."
+                    }
+                  },
+                  "PREFERENCES.INVALID_ONBOARDING": {
+                    "value": {
+                      "statusCode": 422,
+                      "code": "PREFERENCES.INVALID_ONBOARDING",
+                      "message": "The onboarding state is not valid: the step \"profile\" cannot be both completed and skipped.",
+                      "details": { "reason": "the step \"profile\" cannot be both completed and skipped" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Change my preferences",
+        "tags": ["me"]
+      }
+    },
+    "/me/sessions": {
+      "get": {
+        "description": "The open sessions of the person, most recently used first. `current` marks the one of this request.",
+        "operationId": "listSessions",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": { "minimum": 1, "default": 1, "type": "number" }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": { "minimum": 1, "maximum": 100, "default": 20, "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SessionsPageResponseDto" } } }
+          },
+          "400": {
+            "description": "`VALIDATION.FAILED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "VALIDATION.FAILED": {
+                    "value": {
+                      "statusCode": 400,
+                      "code": "VALIDATION.FAILED",
+                      "message": "Request validation failed.",
+                      "details": { "errors": ["property admin should not exist"] }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`HTTP.UNAUTHORIZED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.UNAUTHORIZED": {
+                    "value": { "statusCode": 401, "code": "HTTP.UNAUTHORIZED", "message": "Unauthorized" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Where I am signed in",
+        "tags": ["me"]
+      }
+    },
+    "/me/sessions/{id}": {
+      "delete": {
+        "description": "That device cannot renew its access any more; the access token it already holds stops working when it expires (up to 15 minutes). Ending the current session is the same as signing out.",
+        "operationId": "revokeSession",
+        "parameters": [
+          { "name": "id", "required": true, "in": "path", "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "204": { "description": "The session was ended." },
+          "400": {
+            "description": "`HTTP.BAD_REQUEST`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.BAD_REQUEST": {
+                    "value": {
+                      "statusCode": 400,
+                      "code": "HTTP.BAD_REQUEST",
+                      "message": "Validation failed (uuid is expected)"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`HTTP.UNAUTHORIZED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.UNAUTHORIZED": {
+                    "value": { "statusCode": 401, "code": "HTTP.UNAUTHORIZED", "message": "Unauthorized" }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`SESSION.NOT_FOUND`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "SESSION.NOT_FOUND": {
+                    "value": { "statusCode": 404, "code": "SESSION.NOT_FOUND", "message": "Session not found." }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "End one of my sessions",
+        "tags": ["me"]
+      }
+    },
+    "/me/export": {
+      "get": {
+        "description": "Rule 1.6. One JSON document with all the data of the person, sent as a file: `Content-Disposition: attachment; filename=account-export-<day>.json`, the day in the person's time zone. Every bounded context writes its own section of `data`; secrets (password, tokens) are never in it.",
+        "operationId": "exportUserData",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserDataExportDto" } } }
+          },
+          "401": {
+            "description": "`HTTP.UNAUTHORIZED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.UNAUTHORIZED": {
+                    "value": { "statusCode": 401, "code": "HTTP.UNAUTHORIZED", "message": "Unauthorized" }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`USER.NOT_FOUND`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "USER.NOT_FOUND": {
+                    "value": { "statusCode": 404, "code": "USER.NOT_FOUND", "message": "User not found." }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Download everything that is mine",
+        "tags": ["me"]
+      }
+    },
+    "/me/delete": {
+      "post": {
+        "description": "Rule 1.6. Deletes the account and everything that belongs to it (notes, preferences, sessions and the data of every other context). It cannot be undone, so the current password is asked again.",
+        "operationId": "deleteUserAccount",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DeleteUserAccountDto" } } }
+        },
+        "responses": {
+          "204": { "description": "The account and all its data were deleted." },
+          "400": {
+            "description": "`VALIDATION.FAILED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "VALIDATION.FAILED": {
+                    "value": {
+                      "statusCode": 400,
+                      "code": "VALIDATION.FAILED",
+                      "message": "Request validation failed.",
+                      "details": { "errors": ["property admin should not exist"] }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`HTTP.UNAUTHORIZED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.UNAUTHORIZED": {
+                    "value": { "statusCode": 401, "code": "HTTP.UNAUTHORIZED", "message": "Unauthorized" }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`USER.NOT_FOUND`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "USER.NOT_FOUND": {
+                    "value": { "statusCode": 404, "code": "USER.NOT_FOUND", "message": "User not found." }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`USER.WRONG_PASSWORD`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "USER.WRONG_PASSWORD": {
+                    "value": {
+                      "statusCode": 422,
+                      "code": "USER.WRONG_PASSWORD",
+                      "message": "The password is incorrect."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Delete my account",
+        "tags": ["me"]
+      }
+    },
+    "/users": {
+      "get": {
+        "description": "Newest first.",
+        "operationId": "listUsers",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": { "minimum": 1, "default": 1, "type": "number" }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": { "minimum": 1, "maximum": 100, "default": 20, "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UsersPageResponseDto" } } }
+          },
+          "400": {
+            "description": "`VALIDATION.FAILED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "VALIDATION.FAILED": {
+                    "value": {
+                      "statusCode": 400,
+                      "code": "VALIDATION.FAILED",
+                      "message": "Request validation failed.",
+                      "details": { "errors": ["property admin should not exist"] }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`HTTP.UNAUTHORIZED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.UNAUTHORIZED": {
+                    "value": { "statusCode": 401, "code": "HTTP.UNAUTHORIZED", "message": "Unauthorized" }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`HTTP.FORBIDDEN`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.FORBIDDEN": {
+                    "value": { "statusCode": 403, "code": "HTTP.FORBIDDEN", "message": "Forbidden resource" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "List the accounts (admins only)",
+        "tags": ["users"]
+      }
+    },
+    "/notes": {
+      "post": {
+        "description": "Rule 2.1. A title of up to 120 characters and, optionally, a body of up to 10 000.",
+        "operationId": "createNote",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateNoteDto" } } }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/NoteResponseDto" } } }
+          },
+          "400": {
+            "description": "`VALIDATION.FAILED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "VALIDATION.FAILED": {
+                    "value": {
+                      "statusCode": 400,
+                      "code": "VALIDATION.FAILED",
+                      "message": "Request validation failed.",
+                      "details": { "errors": ["property admin should not exist"] }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`HTTP.UNAUTHORIZED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.UNAUTHORIZED": {
+                    "value": { "statusCode": 401, "code": "HTTP.UNAUTHORIZED", "message": "Unauthorized" }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`NOTE.INVALID_TITLE` or `NOTE.INVALID_BODY`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "NOTE.INVALID_TITLE": {
+                    "value": {
+                      "statusCode": 422,
+                      "code": "NOTE.INVALID_TITLE",
+                      "message": "The title must have between 1 and 120 characters.",
+                      "details": { "maxLength": 120 }
+                    }
+                  },
+                  "NOTE.INVALID_BODY": {
+                    "value": {
+                      "statusCode": 422,
+                      "code": "NOTE.INVALID_BODY",
+                      "message": "The body can have at most 10000 characters.",
+                      "details": { "maxLength": 10000 }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Write a note",
+        "tags": ["notes"]
+      },
+      "get": {
+        "description": "Rules 2.2 and 2.3. Pinned first, then the most recently changed. Archived notes are a list of their own (`archived=true`).",
+        "operationId": "listNotes",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": { "minimum": 1, "default": 1, "type": "number" }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": { "minimum": 1, "maximum": 100, "default": 20, "type": "number" }
+          },
+          {
+            "name": "archived",
+            "required": false,
+            "in": "query",
+            "description": "Rule 2.2: `true` lists the archive instead of the main list.",
+            "schema": { "default": false, "type": "boolean" }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Case-insensitive match on the title or the body.",
+            "schema": { "example": "bread", "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/NotesPageResponseDto" } } }
+          },
+          "400": {
+            "description": "`VALIDATION.FAILED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "VALIDATION.FAILED": {
+                    "value": {
+                      "statusCode": 400,
+                      "code": "VALIDATION.FAILED",
+                      "message": "Request validation failed.",
+                      "details": { "errors": ["property admin should not exist"] }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`HTTP.UNAUTHORIZED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.UNAUTHORIZED": {
+                    "value": { "statusCode": 401, "code": "HTTP.UNAUTHORIZED", "message": "Unauthorized" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "List my notes",
+        "tags": ["notes"]
+      }
+    },
+    "/notes/{id}": {
+      "get": {
+        "description": "Rule 0.4: someone else's note answers 404.",
+        "operationId": "getNote",
+        "parameters": [
+          { "name": "id", "required": true, "in": "path", "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/NoteResponseDto" } } }
+          },
+          "400": {
+            "description": "`HTTP.BAD_REQUEST`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.BAD_REQUEST": {
+                    "value": {
+                      "statusCode": 400,
+                      "code": "HTTP.BAD_REQUEST",
+                      "message": "Validation failed (uuid is expected)"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`HTTP.UNAUTHORIZED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.UNAUTHORIZED": {
+                    "value": { "statusCode": 401, "code": "HTTP.UNAUTHORIZED", "message": "Unauthorized" }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`NOTE.NOT_FOUND`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "NOTE.NOT_FOUND": {
+                    "value": { "statusCode": 404, "code": "NOTE.NOT_FOUND", "message": "Note not found." }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Read one of my notes",
+        "tags": ["notes"]
+      },
+      "patch": {
+        "description": "Rules 2.1 to 2.3. Only what is sent changes; `body: null` clears the body. Either every change is saved or none is. An archived note answers 409 until it is unarchived.",
+        "operationId": "updateNote",
+        "parameters": [
+          { "name": "id", "required": true, "in": "path", "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateNoteDto" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/NoteResponseDto" } } }
+          },
+          "400": {
+            "description": "`VALIDATION.FAILED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "VALIDATION.FAILED": {
+                    "value": {
+                      "statusCode": 400,
+                      "code": "VALIDATION.FAILED",
+                      "message": "Request validation failed.",
+                      "details": { "errors": ["property admin should not exist"] }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`HTTP.UNAUTHORIZED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.UNAUTHORIZED": {
+                    "value": { "statusCode": 401, "code": "HTTP.UNAUTHORIZED", "message": "Unauthorized" }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`NOTE.NOT_FOUND`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "NOTE.NOT_FOUND": {
+                    "value": { "statusCode": 404, "code": "NOTE.NOT_FOUND", "message": "Note not found." }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`NOTE.ARCHIVED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "NOTE.ARCHIVED": {
+                    "value": {
+                      "statusCode": 409,
+                      "code": "NOTE.ARCHIVED",
+                      "message": "The note is archived. Unarchive it before changing it."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`NOTE.INVALID_TITLE` or `NOTE.INVALID_BODY`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "NOTE.INVALID_TITLE": {
+                    "value": {
+                      "statusCode": 422,
+                      "code": "NOTE.INVALID_TITLE",
+                      "message": "The title must have between 1 and 120 characters.",
+                      "details": { "maxLength": 120 }
+                    }
+                  },
+                  "NOTE.INVALID_BODY": {
+                    "value": {
+                      "statusCode": 422,
+                      "code": "NOTE.INVALID_BODY",
+                      "message": "The body can have at most 10000 characters.",
+                      "details": { "maxLength": 10000 }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Change one of my notes",
+        "tags": ["notes"]
+      },
+      "delete": {
+        "description": "Rule 2.4. For good, archived or not.",
+        "operationId": "deleteNote",
+        "parameters": [
+          { "name": "id", "required": true, "in": "path", "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "204": { "description": "The note was deleted." },
+          "400": {
+            "description": "`HTTP.BAD_REQUEST`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.BAD_REQUEST": {
+                    "value": {
+                      "statusCode": 400,
+                      "code": "HTTP.BAD_REQUEST",
+                      "message": "Validation failed (uuid is expected)"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`HTTP.UNAUTHORIZED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.UNAUTHORIZED": {
+                    "value": { "statusCode": 401, "code": "HTTP.UNAUTHORIZED", "message": "Unauthorized" }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`NOTE.NOT_FOUND`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "NOTE.NOT_FOUND": {
+                    "value": { "statusCode": 404, "code": "NOTE.NOT_FOUND", "message": "Note not found." }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Delete one of my notes",
+        "tags": ["notes"]
+      }
+    },
+    "/notes/{id}/archive": {
+      "patch": {
+        "description": "Rule 2.2. It leaves the main list, is unpinned and becomes read-only. Archiving an archived note changes nothing.",
+        "operationId": "archiveNote",
+        "parameters": [
+          { "name": "id", "required": true, "in": "path", "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/NoteResponseDto" } } }
+          },
+          "400": {
+            "description": "`HTTP.BAD_REQUEST`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.BAD_REQUEST": {
+                    "value": {
+                      "statusCode": 400,
+                      "code": "HTTP.BAD_REQUEST",
+                      "message": "Validation failed (uuid is expected)"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`HTTP.UNAUTHORIZED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.UNAUTHORIZED": {
+                    "value": { "statusCode": 401, "code": "HTTP.UNAUTHORIZED", "message": "Unauthorized" }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`NOTE.NOT_FOUND`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "NOTE.NOT_FOUND": {
+                    "value": { "statusCode": 404, "code": "NOTE.NOT_FOUND", "message": "Note not found." }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Archive one of my notes",
+        "tags": ["notes"]
+      }
+    },
+    "/notes/{id}/unarchive": {
+      "patch": {
+        "description": "Rule 2.2. Unarchiving a note that is not archived changes nothing.",
+        "operationId": "unarchiveNote",
+        "parameters": [
+          { "name": "id", "required": true, "in": "path", "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/NoteResponseDto" } } }
+          },
+          "400": {
+            "description": "`HTTP.BAD_REQUEST`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.BAD_REQUEST": {
+                    "value": {
+                      "statusCode": 400,
+                      "code": "HTTP.BAD_REQUEST",
+                      "message": "Validation failed (uuid is expected)"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "`HTTP.UNAUTHORIZED`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "HTTP.UNAUTHORIZED": {
+                    "value": { "statusCode": 401, "code": "HTTP.UNAUTHORIZED", "message": "Unauthorized" }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`NOTE.NOT_FOUND`",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponseDto" },
+                "examples": {
+                  "NOTE.NOT_FOUND": {
+                    "value": { "statusCode": 404, "code": "NOTE.NOT_FOUND", "message": "Note not found." }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Bring one of my notes back from the archive",
+        "tags": ["notes"]
+      }
+    }
+  },
+  "info": {
+    "title": "App API",
+    "description": "The HTTP API of the app.\n\n- **Money** is always an integer number of cents (`amountCents`).\n- **Days** are dates without a time, `YYYY-MM-DD`. \"Today\" and the limits of a month follow the time zone of the person's preferences.\n- **Errors** have one shape, `{ statusCode, code, message, details? }`. `code` is stable (`NOTE.NOT_FOUND`): branch on it, never on the message.\n- **Lists** are paginated: `page` and `limit` in, `{ results, meta }` out.\n- **Ownership**: everything belongs to the signed-in person. Someone else's resource answers 404.\n- **Auth**: `Authorization: Bearer <accessToken>` (15 minutes). Renew it with `POST /auth/refresh`.",
+    "version": "0.1.0",
+    "contact": {}
+  },
+  "tags": [
+    { "name": "auth", "description": "Account, session and the links sent by e-mail (rules 1.1 to 1.5)" },
+    {
+      "name": "me",
+      "description": "The signed-in person: profile, preferences, sessions, export and deletion (rules 1.6 and 1.7)"
+    },
+    { "name": "notes", "description": "The example bounded context: personal notes (rule 2)" },
+    { "name": "users", "description": "Administration" },
+    { "name": "health", "description": "Liveness" }
+  ],
+  "servers": [],
+  "components": {
+    "securitySchemes": { "bearer": { "scheme": "bearer", "bearerFormat": "JWT", "type": "http" } },
+    "schemas": {
+      "ErrorResponseDto": {
+        "type": "object",
+        "properties": {
+          "statusCode": { "type": "number", "example": 404 },
+          "code": {
+            "type": "string",
+            "example": "USER.NOT_FOUND",
+            "description": "Stable, machine-readable. Clients branch on it."
+          },
+          "message": {
+            "type": "string",
+            "example": "User not found.",
+            "description": "For a person reading a log. Never branch on it."
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": true,
+            "example": { "origin": { "kind": "instalment", "id": "7c9e6679-7425-40de-944b-e07fc1f90ae7" } },
+            "description": "What a client needs to react to this code, when the code has something to say: the origin of a linked entry, how long to wait, which limit was reached. The example of each code shows its shape."
+          }
+        },
+        "required": ["statusCode", "code", "message"]
+      },
+      "SignUpDto": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "example": "Jane Doe", "description": "1 to 60 characters after trimming." },
+          "email": { "type": "string", "example": "jane@example.com", "maxLength": 254 },
+          "password": {
+            "type": "string",
+            "example": "secret123",
+            "description": "8 characters or more.",
+            "minLength": 8,
+            "maxLength": 72
+          }
+        },
+        "required": ["name", "email", "password"]
+      },
+      "UserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string", "example": "Jane Doe" },
+          "email": { "type": "string", "example": "jane@example.com" },
+          "role": { "type": "string", "enum": ["USER", "ADMIN"], "example": "USER" },
+          "emailVerified": {
+            "type": "boolean",
+            "description": "Rule 1.2: false until the link sent by e-mail is opened.",
+            "example": false
+          },
+          "createdAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id", "name", "email", "role", "emailVerified", "createdAt"]
+      },
+      "SignInDto": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "example": "jane@example.com" },
+          "password": { "type": "string", "example": "secret123" }
+        },
+        "required": ["email", "password"]
+      },
+      "SessionTokensResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Send it as `Authorization: Bearer <accessToken>`. Keep it in memory only.",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIuLi4ifQ.signature"
+          },
+          "expiresIn": {
+            "type": "number",
+            "description": "Seconds until the access token expires (rule 1.3: 15 minutes).",
+            "example": 900
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Only with `x-auth-transport: token` (native apps): keep it in secure storage and send it back in `x-refresh-token`. With the default transport the refresh token travels in an httpOnly cookie and is not here.",
+            "example": "q3Zr0Jm3z1p0Yk8n6g2sWc5vT7uXb9dLf4hA1eRiOoM"
+          }
+        },
+        "required": ["accessToken", "expiresIn"]
+      },
+      "VerifyEmailDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "The `token` of the link that was sent by e-mail.",
+            "example": "q3Zr0Jm3z1p0Yk8n6g2sWc5vT7uXb9dLf4hA1eRiOoM"
+          }
+        },
+        "required": ["token"]
+      },
+      "ForgotPasswordDto": {
+        "type": "object",
+        "properties": { "email": { "type": "string", "example": "jane@example.com" } },
+        "required": ["email"]
+      },
+      "ResetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "The `token` of the link that was sent by e-mail.",
+            "example": "q3Zr0Jm3z1p0Yk8n6g2sWc5vT7uXb9dLf4hA1eRiOoM"
+          },
+          "password": {
+            "type": "string",
+            "example": "a-new-secret",
+            "description": "8 characters or more.",
+            "minLength": 8,
+            "maxLength": 72
+          }
+        },
+        "required": ["token", "password"]
+      },
+      "AppearanceDto": {
+        "type": "object",
+        "properties": {
+          "theme": { "type": "string", "enum": ["system", "light", "dark"], "example": "system" },
+          "accent": {
+            "type": "string",
+            "enum": ["neutral", "blue", "violet", "emerald", "amber", "rose"],
+            "example": "neutral"
+          },
+          "density": { "type": "string", "enum": ["comfortable", "compact"], "example": "comfortable" },
+          "reduceMotion": {
+            "type": "boolean",
+            "example": false,
+            "description": "Transitions end at once and nothing loops."
+          }
+        },
+        "required": ["theme", "accent", "density", "reduceMotion"]
+      },
+      "OnboardingDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["pending", "finished", "dismissed"],
+            "example": "pending",
+            "description": "`pending` shows the \"continue setup\" card; `finished` and `dismissed` hide it."
+          },
+          "currentStep": {
+            "type": "string",
+            "enum": ["welcome", "profile", "appearance", "done"],
+            "example": "profile",
+            "description": "Where to resume."
+          },
+          "completedSteps": {
+            "type": "array",
+            "example": ["welcome"],
+            "items": { "type": "string", "enum": ["welcome", "profile", "appearance", "done"] }
+          },
+          "skippedSteps": {
+            "type": "array",
+            "example": [],
+            "items": { "type": "string", "enum": ["welcome", "profile", "appearance", "done"] }
+          }
+        },
+        "required": ["status", "currentStep", "completedSteps", "skippedSteps"]
+      },
+      "PreferencesResponseDto": {
+        "type": "object",
+        "properties": {
+          "appearance": { "$ref": "#/components/schemas/AppearanceDto" },
+          "timeZone": {
+            "type": "string",
+            "example": "UTC",
+            "description": "IANA name. \"Today\" and the month follow it."
+          },
+          "onboarding": { "$ref": "#/components/schemas/OnboardingDto" },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Null while the person still has the defaults."
+          }
+        },
+        "required": ["appearance", "timeZone", "onboarding", "updatedAt"]
+      },
+      "AppearanceChangesDto": {
+        "type": "object",
+        "properties": {
+          "theme": { "type": "string", "enum": ["system", "light", "dark"] },
+          "accent": { "type": "string", "enum": ["neutral", "blue", "violet", "emerald", "amber", "rose"] },
+          "density": { "type": "string", "enum": ["comfortable", "compact"] },
+          "reduceMotion": { "type": "boolean", "example": true }
+        }
+      },
+      "OnboardingChangesDto": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "enum": ["pending", "finished", "dismissed"] },
+          "currentStep": { "type": "string", "enum": ["welcome", "profile", "appearance", "done"] },
+          "completedSteps": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["welcome", "profile", "appearance", "done"] }
+          },
+          "skippedSteps": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["welcome", "profile", "appearance", "done"] }
+          }
+        }
+      },
+      "UpdatePreferencesDto": {
+        "type": "object",
+        "properties": {
+          "appearance": { "$ref": "#/components/schemas/AppearanceChangesDto" },
+          "timeZone": { "type": "string", "example": "Europe/Lisbon" },
+          "onboarding": { "$ref": "#/components/schemas/OnboardingChangesDto" }
+        }
+      },
+      "SessionResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "current": {
+            "type": "boolean",
+            "description": "True for the session this request was made with.",
+            "example": true
+          },
+          "userAgent": {
+            "type": "string",
+            "nullable": true,
+            "description": "The `User-Agent` of the device, as it identified itself.",
+            "example": "Mozilla/5.0 (Android 16; Mobile; rv:147.0) Gecko/147.0 Firefox/147.0"
+          },
+          "createdAt": { "type": "string", "format": "date-time", "description": "When the person signed in." },
+          "lastUsedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the session was last renewed."
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When it ends if it is not renewed (30 days after the last use)."
+          }
+        },
+        "required": ["id", "current", "userAgent", "createdAt", "lastUsedAt", "expiresAt"]
+      },
+      "PaginationMetaDto": {
+        "type": "object",
+        "properties": {
+          "page": { "type": "number", "example": 1 },
+          "limit": { "type": "number", "example": 20 },
+          "totalItems": { "type": "number", "example": 42 },
+          "totalPages": { "type": "number", "example": 3 }
+        },
+        "required": ["page", "limit", "totalItems", "totalPages"]
+      },
+      "SessionsPageResponseDto": {
+        "type": "object",
+        "properties": {
+          "results": { "type": "array", "items": { "$ref": "#/components/schemas/SessionResponseDto" } },
+          "meta": { "$ref": "#/components/schemas/PaginationMetaDto" }
+        },
+        "required": ["results", "meta"]
+      },
+      "UserDataExportDto": {
+        "type": "object",
+        "properties": {
+          "format": { "type": "string", "example": "app.export", "description": "Identifies the file." },
+          "version": { "type": "number", "example": 1, "description": "Changes when the shape of a section changes." },
+          "exportedAt": { "type": "string", "format": "date-time" },
+          "data": {
+            "type": "object",
+            "additionalProperties": { "type": "object", "additionalProperties": true },
+            "description": "One section per area of the app, each written by the area that owns the data: `identity` (profile, preferences, sessions) and `notes` (every note, archived ones included). Passwords and tokens are never here.",
+            "example": {
+              "identity": {
+                "profile": { "name": "Jane Doe", "email": "jane@example.com" },
+                "preferences": null,
+                "sessions": []
+              },
+              "notes": { "notes": [] }
+            }
+          }
+        },
+        "required": ["format", "version", "exportedAt", "data"]
+      },
+      "DeleteUserAccountDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "example": "secret123",
+            "description": "The current password, asked again before deleting."
+          }
+        },
+        "required": ["password"]
+      },
+      "UsersPageResponseDto": {
+        "type": "object",
+        "properties": {
+          "results": { "type": "array", "items": { "$ref": "#/components/schemas/UserResponseDto" } },
+          "meta": { "$ref": "#/components/schemas/PaginationMetaDto" }
+        },
+        "required": ["results", "meta"]
+      },
+      "CreateNoteDto": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "example": "Groceries", "maxLength": 120 },
+          "body": {
+            "type": "string",
+            "nullable": true,
+            "example": "Milk\nBread",
+            "maxLength": 10000,
+            "description": "Blank or null means no body. Line breaks are kept."
+          },
+          "pinned": { "type": "boolean", "example": false, "default": false }
+        },
+        "required": ["title"]
+      },
+      "NoteResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "title": { "type": "string", "example": "Groceries" },
+          "body": { "type": "string", "nullable": true, "example": "Milk\nBread" },
+          "pinned": { "type": "boolean", "example": false, "description": "Rule 2.3: pinned notes come first." },
+          "archivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Rule 2.2: set while the note is archived (read-only)."
+          },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id", "title", "body", "pinned", "archivedAt", "createdAt", "updatedAt"]
+      },
+      "NotesPageResponseDto": {
+        "type": "object",
+        "properties": {
+          "results": { "type": "array", "items": { "$ref": "#/components/schemas/NoteResponseDto" } },
+          "meta": { "$ref": "#/components/schemas/PaginationMetaDto" }
+        },
+        "required": ["results", "meta"]
+      },
+      "UpdateNoteDto": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "example": "Shopping", "maxLength": 120 },
+          "body": { "type": "string", "nullable": true, "example": null, "maxLength": 10000 },
+          "pinned": { "type": "boolean", "example": true }
+        }
+      }
+    }
+  }
+}
