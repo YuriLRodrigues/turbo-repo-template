@@ -2,7 +2,8 @@ import type { NextConfig } from 'next'
 
 /**
  * The product page is a static export, like the app: `next build` writes plain files to `out/` and any static host
- * serves them. There is no Next server at runtime: no Server Actions, no Route Handlers, no `proxy.ts`.
+ * serves them. There is no Next server at runtime: no Server Actions, no `proxy.ts`, and a Route Handler only as a
+ * static GET written at build time (the share images, `share.png`).
  */
 const nextConfig: NextConfig = {
   output: 'export',
@@ -17,6 +18,11 @@ const nextConfig: NextConfig = {
   transpilePackages: ['@workspace/ui', '@workspace/utils'],
   // `next dev` started by a coding agent would write an AGENTS.md here: what an agent must know is written by hand.
   agentRules: false,
+  experimental: {
+    // One root layout per language (app/(pt), app/(intl)/[lang]): the 404 is a document of its own,
+    // app/global-not-found.tsx.
+    globalNotFound: true,
+  },
 }
 
 export default nextConfig

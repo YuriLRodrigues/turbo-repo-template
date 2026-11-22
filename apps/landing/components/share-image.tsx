@@ -1,16 +1,16 @@
 import { ImageResponse } from 'next/og'
 
 import { site } from '@/config/site'
+import type { Locale } from '@/i18n/config'
+import { getDictionary } from '@/i18n/dictionaries'
 
-// A static export writes this file at build time.
-export const dynamic = 'force-static'
+export const shareImageSize = { width: 1200, height: 630 }
 
-export const alt = site.title
-export const size = { width: 1200, height: 630 }
-export const contentType = 'image/png'
-
-/** The share image of the page, written at build time: the name and the promise, on the neutral dark ground. */
-const OpengraphImage = () =>
+/**
+ * The share image of the page in one language, written at build time by the `opengraph-image.tsx` next to each root
+ * layout: the name and the promise of the hero, on the neutral dark ground.
+ */
+export const shareImage = (locale: Locale) =>
   new ImageResponse(
     <div
       style={{
@@ -42,10 +42,8 @@ const OpengraphImage = () =>
         {site.name}
       </div>
       <div style={{ display: 'flex', fontSize: 72, lineHeight: 1.1, letterSpacing: -2, maxWidth: 960 }}>
-        {site.title.split(': ')[1] ?? site.title}
+        {getDictionary(locale).hero.title}
       </div>
     </div>,
-    size,
+    shareImageSize,
   )
-
-export default OpengraphImage

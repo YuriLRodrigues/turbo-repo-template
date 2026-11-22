@@ -15,10 +15,12 @@ import { Button } from '@workspace/ui/components/button'
 import { Disclosure } from '@workspace/ui/components/disclosure'
 
 import { site } from '@/config/site'
+import type { Dictionary } from '@/i18n/dictionaries'
 
 /*
- * The sections of the page. Generic copy on purpose: replace the words, keep the shape (a heading, a short lead, the
- * content), and add or remove sections in `config/site.ts` and `app/page.tsx`.
+ * The sections of the page. The words come from the dictionary of the language (`i18n/dictionaries/`): replace them
+ * there, keep the shape (a heading, a short lead, the content), and add or remove sections in `config/site.ts` and
+ * `components/home-page.tsx`.
  */
 
 const Section = ({
@@ -49,92 +51,55 @@ const Section = ({
   </section>
 )
 
-export const Hero = () => (
+export const Hero = ({ dict }: { dict: Dictionary }) => (
   <section id="top" className="mx-auto max-w-6xl px-4 pt-20 pb-24 sm:px-6 sm:pt-28">
     <p className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
       <span aria-hidden className="size-1.5 rounded-full bg-success" />
-      Open for early access
+      {dict.hero.badge}
     </p>
     <h1 className="mt-6 max-w-3xl font-display text-4xl leading-[1.05] font-semibold tracking-[-0.03em] text-balance sm:text-6xl">
-      Start the product, not the plumbing.
+      {dict.hero.title}
     </h1>
-    <p className="mt-5 max-w-xl text-lg text-pretty text-muted-foreground">{site.description}</p>
+    <p className="mt-5 max-w-xl text-lg text-pretty text-muted-foreground">{dict.hero.lead}</p>
     <div className="mt-8 flex flex-wrap gap-3">
       <Button size="lg" render={<a href={`${site.appUrl}/sign-up/`} />}>
-        Start free
+        {dict.hero.primary}
         <ArrowRightIcon aria-hidden />
       </Button>
       <Button size="lg" variant="secondary" render={<a href="#features" />}>
-        See what is included
+        {dict.hero.secondary}
       </Button>
     </div>
   </section>
 )
 
-const FEATURES: { icon: LucideIcon; title: string; text: string }[] = [
-  {
-    icon: KeyRoundIcon,
-    title: 'Accounts that are done',
-    text: 'Sign-up, sign-in, e-mail confirmation, password reset and sessions you can see and end.',
-  },
-  {
-    icon: ShieldCheckIcon,
-    title: 'Safe by default',
-    text: 'Short access tokens, rotating refresh tokens in an httpOnly cookie, and reuse detection.',
-  },
-  {
-    icon: PaletteIcon,
-    title: 'A look people choose',
-    text: 'Light and dark, six accents and two densities, saved in the account and applied before the first paint.',
-  },
-  {
-    icon: LayersIcon,
-    title: 'Clean architecture',
-    text: 'Use cases, entities and ports in the API; every rule tested without a framework in the way.',
-  },
-  {
-    icon: BarChart3Icon,
-    title: 'Charts that fit the theme',
-    text: 'Nine configurable charts on Recharts, colored by the same tokens as the rest of the interface.',
-  },
-  {
-    icon: ZapIcon,
-    title: 'Fast to ship',
-    text: 'Static exports for the web and this page, one API, and checks that run on every commit.',
-  },
-]
+/** The icon of each feature, in the order of `features.items` in the dictionary. */
+const FEATURE_ICONS: LucideIcon[] = [KeyRoundIcon, ShieldCheckIcon, PaletteIcon, LayersIcon, BarChart3Icon, ZapIcon]
 
-export const Features = () => (
-  <Section
-    id="features"
-    eyebrow="Features"
-    title="What is already there on the first day"
-    lead="The parts every product needs and nobody wants to build twice."
-  >
+export const Features = ({ dict }: { dict: Dictionary }) => (
+  <Section id="features" eyebrow={dict.features.eyebrow} title={dict.features.title} lead={dict.features.lead}>
     <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {FEATURES.map(({ icon: Icon, title, text }) => (
-        <li key={title} className="rounded-(--radius-card) surface p-5">
-          <span aria-hidden className="grid size-10 place-items-center rounded-lg bg-primary-soft text-primary-text">
-            <Icon className="size-5" />
-          </span>
-          <h3 className="mt-4 font-display font-semibold">{title}</h3>
-          <p className="mt-1.5 text-sm text-pretty text-muted-foreground">{text}</p>
-        </li>
-      ))}
+      {dict.features.items.map(({ title, text }, index) => {
+        const Icon = FEATURE_ICONS[index] ?? ZapIcon
+
+        return (
+          <li key={title} className="rounded-(--radius-card) surface p-5">
+            <span aria-hidden className="grid size-10 place-items-center rounded-lg bg-primary-soft text-primary-text">
+              <Icon className="size-5" />
+            </span>
+            <h3 className="mt-4 font-display font-semibold">{title}</h3>
+            <p className="mt-1.5 text-sm text-pretty text-muted-foreground">{text}</p>
+          </li>
+        )
+      })}
     </ul>
   </Section>
 )
 
-const STEPS = [
-  { title: 'Create your account', text: 'A name, an e-mail and a password. No card.' },
-  { title: 'Make it yours', text: 'Pick the theme and the accent: they follow you to every device.' },
-  { title: 'Start working', text: 'Everything you write is yours: download it or delete it whenever you want.' },
-]
-
-export const HowItWorks = () => (
-  <Section id="how-it-works" eyebrow="How it works" title="Three steps, one minute">
+export const HowItWorks = ({ dict }: { dict: Dictionary }) => (
+  <Section id="how-it-works" eyebrow={dict.howItWorks.eyebrow} title={dict.howItWorks.title}>
     <ol className="grid grid-cols-1 gap-6 md:grid-cols-3">
-      {STEPS.map((step, index) => (
+      {dict.howItWorks.steps.map((step, index) => (
         <li key={step.title} className="flex gap-4">
           <span
             aria-hidden
@@ -152,22 +117,10 @@ export const HowItWorks = () => (
   </Section>
 )
 
-const QUESTIONS = [
-  { question: 'Is there a free plan?', answer: 'Yes. Start free and decide later; nothing is charged without asking.' },
-  {
-    question: 'Can I take my data with me?',
-    answer: 'Always. One button downloads everything the account has as a JSON file.',
-  },
-  {
-    question: 'What happens when I delete my account?',
-    answer: 'Everything that belongs to it is deleted for good, at once. It cannot be undone.',
-  },
-]
-
-export const Faq = () => (
-  <Section id="faq" eyebrow="FAQ" title="The usual questions">
+export const Faq = ({ dict }: { dict: Dictionary }) => (
+  <Section id="faq" eyebrow={dict.faq.eyebrow} title={dict.faq.title}>
     <ul className="flex max-w-2xl flex-col divide-y divide-border">
-      {QUESTIONS.map((item) => (
+      {dict.faq.items.map((item) => (
         <li key={item.question} className="py-3">
           <Disclosure label={item.question}>
             <p className="pt-2 pb-1 text-sm text-pretty text-muted-foreground">{item.answer}</p>
@@ -178,14 +131,14 @@ export const Faq = () => (
   </Section>
 )
 
-export const Closing = () => (
+export const Closing = ({ dict }: { dict: Dictionary }) => (
   <section className="border-t border-border py-20 sm:py-24">
     <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 px-4 sm:px-6 md:flex-row md:items-center md:justify-between">
       <h2 className="max-w-xl font-display text-3xl font-semibold tracking-[-0.02em] text-balance">
-        Ready when you are.
+        {dict.closing.title}
       </h2>
       <Button size="lg" render={<a href={`${site.appUrl}/sign-up/`} />}>
-        Create your account
+        {dict.closing.cta}
         <ArrowRightIcon aria-hidden />
       </Button>
     </div>

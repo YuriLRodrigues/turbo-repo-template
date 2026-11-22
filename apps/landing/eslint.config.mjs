@@ -13,7 +13,10 @@ export default defineConfig([
         {
           paths: [
             { name: 'next/headers', message: 'Static export: there is no request on a server to read.' },
-            { name: 'next/server', message: 'Static export: no Route Handlers and no proxy.' },
+            {
+              name: 'next/server',
+              message: 'Static export: no proxy; a static GET Route Handler returns a plain Response.',
+            },
             { name: 'next/cache', message: 'Static export: there is no server cache to revalidate.' },
             { name: 'server-only', message: 'Static export: every module runs in the browser.' },
           ],
@@ -22,9 +25,9 @@ export default defineConfig([
     },
   },
 
-  // `robots.ts` and `sitemap.ts` are App Router conventions too: Next reads their default export.
+  // The metadata files and the global 404 are App Router conventions too: Next reads their default export.
   {
-    files: ['app/robots.ts', 'app/sitemap.ts', 'app/opengraph-image.tsx'],
+    files: ['app/robots.ts', 'app/sitemap.ts', 'app/global-not-found.tsx'],
     rules: {
       'no-restricted-syntax': ['error', ...noRawOverflow, noUseServer, noUseActionState],
     },
