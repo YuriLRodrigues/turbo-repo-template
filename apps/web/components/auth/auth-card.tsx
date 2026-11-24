@@ -14,7 +14,8 @@ type AuthCardProps = {
 
 /** The frame of every screen of the sign-in flow: the brand, one card, and the links around it. */
 export const AuthCard = ({ title, description, children, footer }: AuthCardProps) => (
-  <main className="flex min-h-svh flex-col items-center justify-center gap-6 px-4 py-10">
+  <main className="relative isolate flex min-h-svh flex-col items-center justify-center gap-6 px-4 py-10">
+    <div aria-hidden className="brand-backdrop" />
     <Link href="/" aria-label="Home">
       <Brand />
     </Link>

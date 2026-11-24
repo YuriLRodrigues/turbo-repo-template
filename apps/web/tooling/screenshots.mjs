@@ -28,8 +28,8 @@ const VIEWPORTS = [
 ]
 
 const LOOKS = [
-  { name: 'light-neutral', theme: 'light', accent: 'neutral' },
-  { name: 'dark-violet', theme: 'dark', accent: 'violet' },
+  { name: 'light-rose', theme: 'light', accent: 'rose' },
+  { name: 'dark-rose', theme: 'dark', accent: 'rose' },
 ]
 
 /** The one request that may fail on purpose: restoring a session when there is none yet. */

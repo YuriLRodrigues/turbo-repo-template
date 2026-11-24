@@ -5,7 +5,7 @@ export const Brand = () => (
   <span className="flex items-center gap-2.5">
     <span
       aria-hidden
-      className="grid size-8 place-items-center rounded-lg bg-primary font-display text-sm font-bold text-primary-foreground"
+      className="grid size-8 place-items-center rounded-lg bg-brand font-display text-sm font-bold text-brand-foreground"
     >
       {siteConfig.name.charAt(0)}
     </span>
