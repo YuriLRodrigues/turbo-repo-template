@@ -11,7 +11,8 @@ context are already done, tested and documented, so the first day goes to what m
   shell with a collapsible sidebar and a phone tab bar.
 - **Landing**: a minimal product page in Portuguese, English and Spanish, with a language switcher and the basic SEO
   (hreflang, `og:locale`, a share image and a sitemap per language).
-- **Design system**: neutral tokens on Tailwind v4, Base UI primitives with the shadcn anatomy, nine configurable charts
+- **Design system**: tokens on Tailwind v4 with the brand of the template (a red-pink to violet gradient on a near-black
+  ground), Base UI primitives with the shadcn anatomy, nine configurable charts
   on Recharts, light/dark themes with six accents, contrast-checked.
 - **Tooling**: Turborepo, npm workspaces, ESLint (with the layer rules of the API), Prettier, Vitest, Playwright,
   husky + lint-staged + commitlint, Claude Code skills.
@@ -94,8 +95,8 @@ Run the `rename-project` skill in Claude Code, or by hand:
 3. Keys: the refresh cookie (`apps/api/src/presentations/http/auth/refresh-transport.ts`), the storage keys of the
    appearance and the sidebar (`packages/ui`), the Web Lock name (`packages/api-client`), the session key of the
    language switcher (`apps/landing`).
-4. Look: the values in `packages/ui/src/styles/tokens.css`, the fonts in the root layouts, `app/icon.svg` and
-   `components/shell/brand.tsx`; then `npm run contrast`.
+4. Look: the values in `packages/ui/src/styles/tokens.css` (the brand is `--brand-from` and `--brand-to`), the fonts in
+   the root layouts, `app/icon.svg` and `components/shell/brand.tsx`; then `npm run contrast`.
 5. The example: keep the `notes` context as a reference until the first real context exists, then remove it (the
    skill lists every file).
 

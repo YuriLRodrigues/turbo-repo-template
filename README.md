@@ -11,8 +11,9 @@ de exemplo já vêm prontos, testados e documentados, para que o primeiro dia v�
   um shell com barra lateral recolhível e barra de abas no celular.
 - **Landing**: uma página de produto mínima em português, inglês e espanhol, com seletor de idioma e o SEO básico
   (hreflang, `og:locale`, imagem de compartilhamento e sitemap por idioma).
-- **Design system**: tokens neutros no Tailwind v4, primitivos do Base UI com a anatomia do shadcn, nove gráficos
-  configuráveis em Recharts, temas claro/escuro com seis cores de destaque, contraste conferido.
+- **Design system**: tokens no Tailwind v4 com a marca do template (um degradê de rosa-avermelhado para violeta, num
+  fundo quase preto), primitivos do Base UI com a anatomia do shadcn, nove gráficos configuráveis em Recharts, temas
+  claro/escuro com seis cores de destaque, contraste conferido.
 - **Ferramentas**: Turborepo, npm workspaces, ESLint (com as regras de camada da API), Prettier, Vitest, Playwright,
   husky + lint-staged + commitlint, skills do Claude Code.
 
@@ -94,8 +95,8 @@ Rode a skill `rename-project` no Claude Code, ou faça à mão:
 3. Chaves: o cookie de renovação (`apps/api/src/presentations/http/auth/refresh-transport.ts`), as chaves de
    armazenamento da aparência e da barra lateral (`packages/ui`), o nome do Web Lock (`packages/api-client`), a chave
    de sessão do seletor de idioma (`apps/landing`).
-4. Visual: os valores de `packages/ui/src/styles/tokens.css`, as fontes dos layouts raiz, `app/icon.svg` e
-   `components/shell/brand.tsx`; depois `npm run contrast`.
+4. Visual: os valores de `packages/ui/src/styles/tokens.css` (a marca está em `--brand-from` e `--brand-to`), as
+   fontes dos layouts raiz, `app/icon.svg` e `components/shell/brand.tsx`; depois `npm run contrast`.
 5. O exemplo: mantenha o contexto `notes` como referência até existir o primeiro contexto de verdade, depois remova (a
    skill lista cada arquivo).
 
