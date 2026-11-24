@@ -22,7 +22,8 @@ export const es: Dictionary = {
   },
   hero: {
     badge: 'Acceso anticipado abierto',
-    title: 'Empieza el producto, no la fontanería.',
+    title: 'Empieza el producto,',
+    titleAccent: 'no la fontanería.',
     lead: 'Cuentas, sesiones, preferencias y un sistema de diseño ya listos, para que el primer día vaya a lo que hace distinto a tu producto.',
     primary: 'Empieza gratis',
     secondary: 'Mira lo que ya viene incluido',

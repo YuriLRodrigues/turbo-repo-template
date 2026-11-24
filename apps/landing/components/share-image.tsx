@@ -20,7 +20,7 @@ export const shareImage = (locale: Locale) =>
         flexDirection: 'column',
         justifyContent: 'space-between',
         padding: 80,
-        background: '#0b0b0b',
+        background: '#09090c',
         color: '#f5f5f5',
       }}
     >
@@ -31,8 +31,8 @@ export const shareImage = (locale: Locale) =>
             width: 56,
             height: 56,
             borderRadius: 14,
-            background: '#f5f5f5',
-            color: '#0b0b0b',
+            backgroundImage: 'linear-gradient(135deg, #ff1e56, #a066ff)',
+            color: '#ffffff',
             alignItems: 'center',
             justifyContent: 'center',
           }}
@@ -41,8 +41,26 @@ export const shareImage = (locale: Locale) =>
         </div>
         {site.name}
       </div>
-      <div style={{ display: 'flex', fontSize: 72, lineHeight: 1.1, letterSpacing: -2, maxWidth: 960 }}>
-        {getDictionary(locale).hero.title}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          fontSize: 72,
+          lineHeight: 1.1,
+          letterSpacing: -2,
+          maxWidth: 960,
+        }}
+      >
+        <span>{getDictionary(locale).hero.title}</span>
+        <span
+          style={{
+            backgroundImage: 'linear-gradient(92deg, #ff1e56, #a066ff)',
+            backgroundClip: 'text',
+            color: 'transparent',
+          }}
+        >
+          {getDictionary(locale).hero.titleAccent}
+        </span>
       </div>
     </div>,
     shareImageSize,

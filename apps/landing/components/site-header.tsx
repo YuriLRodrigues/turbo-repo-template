@@ -21,7 +21,7 @@ export const SiteHeader = ({ lang }: { lang: Locale }) => {
         >
           <span
             aria-hidden
-            className="grid size-8 place-items-center rounded-lg bg-primary text-sm font-bold text-primary-foreground"
+            className="grid size-8 place-items-center rounded-lg bg-brand text-sm font-bold text-brand-foreground"
           >
             {site.name.charAt(0)}
           </span>

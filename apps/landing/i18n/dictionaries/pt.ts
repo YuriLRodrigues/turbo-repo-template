@@ -24,7 +24,8 @@ export const pt = {
   },
   hero: {
     badge: 'Acesso antecipado aberto',
-    title: 'Comece o produto, não o encanamento.',
+    title: 'Comece o produto,',
+    titleAccent: 'não o encanamento.',
     lead: 'Contas, sessões, preferências e um design system já prontos, para que o primeiro dia vá para o que torna o seu produto diferente.',
     primary: 'Comece grátis',
     secondary: 'Veja o que já vem pronto',

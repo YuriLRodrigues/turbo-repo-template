@@ -52,23 +52,26 @@ const Section = ({
 )
 
 export const Hero = ({ dict }: { dict: Dictionary }) => (
-  <section id="top" className="mx-auto max-w-6xl px-4 pt-20 pb-24 sm:px-6 sm:pt-28">
-    <p className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
-      <span aria-hidden className="size-1.5 rounded-full bg-success" />
-      {dict.hero.badge}
-    </p>
-    <h1 className="mt-6 max-w-3xl font-display text-4xl leading-[1.05] font-semibold tracking-[-0.03em] text-balance sm:text-6xl">
-      {dict.hero.title}
-    </h1>
-    <p className="mt-5 max-w-xl text-lg text-pretty text-muted-foreground">{dict.hero.lead}</p>
-    <div className="mt-8 flex flex-wrap gap-3">
-      <Button size="lg" render={<a href={`${site.appUrl}/sign-up/`} />}>
-        {dict.hero.primary}
-        <ArrowRightIcon aria-hidden />
-      </Button>
-      <Button size="lg" variant="secondary" render={<a href="#features" />}>
-        {dict.hero.secondary}
-      </Button>
+  <section id="top" className="relative isolate">
+    <div aria-hidden className="brand-backdrop" />
+    <div className="mx-auto max-w-6xl px-4 pt-20 pb-24 sm:px-6 sm:pt-28">
+      <p className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground">
+        <span aria-hidden className="size-1.5 rounded-full bg-success" />
+        {dict.hero.badge}
+      </p>
+      <h1 className="mt-6 max-w-3xl font-display text-4xl leading-[1.05] font-semibold tracking-[-0.03em] text-balance sm:text-6xl">
+        {dict.hero.title} <span className="text-brand">{dict.hero.titleAccent}</span>
+      </h1>
+      <p className="mt-5 max-w-xl text-lg text-pretty text-muted-foreground">{dict.hero.lead}</p>
+      <div className="mt-8 flex flex-wrap gap-3">
+        <Button size="lg" render={<a href={`${site.appUrl}/sign-up/`} />}>
+          {dict.hero.primary}
+          <ArrowRightIcon aria-hidden />
+        </Button>
+        <Button size="lg" variant="secondary" render={<a href="#features" />}>
+          {dict.hero.secondary}
+        </Button>
+      </div>
     </div>
   </section>
 )

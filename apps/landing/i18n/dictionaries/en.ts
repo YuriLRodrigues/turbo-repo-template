@@ -22,7 +22,8 @@ export const en: Dictionary = {
   },
   hero: {
     badge: 'Open for early access',
-    title: 'Start the product, not the plumbing.',
+    title: 'Start the product,',
+    titleAccent: 'not the plumbing.',
     lead: 'Accounts, sessions, preferences and a design system that are already done, so the first day goes to what makes your product different.',
     primary: 'Start free',
     secondary: 'See what is included',
