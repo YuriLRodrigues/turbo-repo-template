@@ -1,6 +1,7 @@
 /*
- * Design tokens. Neutral on purpose: a grey scale, one accent the person picks, and the status colors. A product
- * gives itself a face by changing these values (and the font), not the components.
+ * Design tokens: a cool grey scale, the brand (a red-pink to violet gradient), one accent the person picks and the
+ * status colors. The default accent is `rose`, the red-pink of the brand. A product gives itself another face by
+ * changing these values (and the font), not the components.
  *
  * <html> carries the person's choices as attributes, written before the first paint by the appearance script (see
  * src/appearance): data-theme (light | dark, already resolved), data-accent, data-density (comfortable | compact) and
@@ -26,6 +27,9 @@
   --color-card-foreground: var(--foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--foreground);
+  --color-brand-from: var(--brand-from);
+  --color-brand-to: var(--brand-to);
+  --color-brand-foreground: var(--brand-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-text: var(--primary-text);
@@ -170,6 +174,12 @@
 
   --border: oklch(0.92 0 0);
   --border-strong: oklch(0.86 0 0);
+
+  /* The brand: the two ends of the gradient (marks, display words, the glow behind a hero) and the faint grid. */
+  --brand-from: oklch(0.56 0.235 17);
+  --brand-to: oklch(0.53 0.22 297);
+  --brand-foreground: oklch(0.99 0 0);
+  --grid-line: oklch(0.17 0 0 / 0.055);
   --ring: var(--primary);
   --scrim: oklch(0.17 0 0 / 0.4);
 
@@ -203,21 +213,25 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --bg-base: oklch(0.15 0 0);
+  --bg-base: oklch(0.141 0.007 285);
   --foreground: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.72 0 0);
+  --muted-foreground: oklch(0.72 0.01 285);
 
-  --card: oklch(0.19 0 0);
-  --popover: oklch(0.22 0 0);
+  --card: oklch(0.181 0.012 285);
+  --popover: oklch(0.215 0.014 285);
 
   --muted: oklch(1 0 0 / 0.06);
   --muted-hover: oklch(1 0 0 / 0.1);
   --well-ring: oklch(1 0 0 / 0.07);
-  --raised: oklch(0.3 0 0);
+  --raised: oklch(0.29 0.014 285);
 
   --border: oklch(1 0 0 / 0.1);
   --border-strong: oklch(1 0 0 / 0.17);
   --scrim: oklch(0 0 0 / 0.6);
+
+  --brand-from: oklch(0.643 0.246 16.4);
+  --brand-to: oklch(0.646 0.218 297.4);
+  --grid-line: oklch(1 0 0 / 0.045);
 
   --success: oklch(0.7 0.15 152);
   --success-text: oklch(0.8 0.13 152);
@@ -249,8 +263,20 @@
  * `primary` fills (buttons, the switch), `primary-text` is the accent as text on a surface, `primary-soft` a tint.
  * `data-accent-preview` scopes an accent to one element (the swatches of the appearance controls), so a swatch shows
  * the real `primary` of its accent in the current theme.
+ *
+ * `rose` is the default accent and the red-pink end of the brand, so it holds the bare `:root` (a page without the
+ * attribute still has the brand). Blocks go from the least to the most specific: the contrast check applies them in
+ * source order, the browser by specificity, and both must agree.
  */
 :root,
+:root[data-accent='rose'],
+[data-accent-preview='rose'] {
+  --primary: oklch(0.56 0.235 17);
+  --primary-foreground: oklch(0.99 0 0);
+  --primary-text: oklch(0.52 0.22 17);
+  --primary-soft: oklch(0.56 0.235 17 / 0.1);
+}
+:root[data-accent='neutral'],
 [data-accent-preview='neutral'] {
   --primary: oklch(0.21 0 0);
   --primary-foreground: oklch(0.98 0 0);
@@ -266,10 +292,10 @@
 }
 :root[data-accent='violet'],
 [data-accent-preview='violet'] {
-  --primary: oklch(0.52 0.22 293);
+  --primary: oklch(0.53 0.22 297);
   --primary-foreground: oklch(0.99 0 0);
-  --primary-text: oklch(0.5 0.22 293);
-  --primary-soft: oklch(0.52 0.22 293 / 0.1);
+  --primary-text: oklch(0.5 0.22 297);
+  --primary-soft: oklch(0.53 0.22 297 / 0.1);
 }
 :root[data-accent='emerald'],
 [data-accent-preview='emerald'] {
@@ -285,15 +311,16 @@
   --primary-text: oklch(0.48 0.11 60);
   --primary-soft: oklch(0.79 0.16 75 / 0.18);
 }
-:root[data-accent='rose'],
-[data-accent-preview='rose'] {
-  --primary: oklch(0.54 0.21 12);
-  --primary-foreground: oklch(0.99 0 0);
-  --primary-text: oklch(0.51 0.2 12);
-  --primary-soft: oklch(0.54 0.21 12 / 0.1);
-}
 
 :root[data-theme='dark'],
+:root[data-theme='dark'][data-accent='rose'],
+[data-theme='dark'] [data-accent-preview='rose'] {
+  --primary: oklch(0.643 0.246 16.4);
+  --primary-foreground: oklch(0.14 0.02 17);
+  --primary-text: oklch(0.74 0.16 14);
+  --primary-soft: oklch(0.643 0.246 16.4 / 0.18);
+}
+:root[data-theme='dark'][data-accent='neutral'],
 [data-theme='dark'] [data-accent-preview='neutral'] {
   --primary: oklch(0.93 0 0);
   --primary-foreground: oklch(0.18 0 0);
@@ -309,10 +336,10 @@
 }
 :root[data-theme='dark'][data-accent='violet'],
 [data-theme='dark'] [data-accent-preview='violet'] {
-  --primary: oklch(0.73 0.16 293);
-  --primary-foreground: oklch(0.16 0.03 293);
-  --primary-text: oklch(0.79 0.14 293);
-  --primary-soft: oklch(0.73 0.16 293 / 0.18);
+  --primary: oklch(0.646 0.218 297.4);
+  --primary-foreground: oklch(0.14 0.03 297);
+  --primary-text: oklch(0.78 0.14 297);
+  --primary-soft: oklch(0.646 0.218 297.4 / 0.2);
 }
 :root[data-theme='dark'][data-accent='emerald'],
 [data-theme='dark'] [data-accent-preview='emerald'] {
@@ -327,13 +354,6 @@
   --primary-foreground: oklch(0.2 0.04 60);
   --primary-text: oklch(0.85 0.13 80);
   --primary-soft: oklch(0.82 0.15 78 / 0.16);
-}
-:root[data-theme='dark'][data-accent='rose'],
-[data-theme='dark'] [data-accent-preview='rose'] {
-  --primary: oklch(0.72 0.16 12);
-  --primary-foreground: oklch(0.17 0.04 12);
-  --primary-text: oklch(0.79 0.13 12);
-  --primary-soft: oklch(0.72 0.16 12 / 0.18);
 }
 
 /* ── Density ──────────────────────────────────────────────────────────────────────────────────────────────────── */

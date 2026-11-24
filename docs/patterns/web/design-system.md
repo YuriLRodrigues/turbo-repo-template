@@ -1,8 +1,10 @@
 # Design system
 
 `packages/ui` is the design system of both apps: tokens on Tailwind v4, primitives on Base UI with the shadcn
-anatomy, the charts, and the appearance store. It is neutral on purpose: a product gives itself a face by changing
-the tokens and the font, not the components.
+anatomy, the charts, and the appearance store. The components are neutral; the face of the template lives in the
+tokens: a near-black, slightly cool ground in the dark theme, the brand gradient (red-pink to violet) and `rose`, the
+red-pink end of it, as the default accent. A product gives itself another face by changing the tokens and the font,
+not the components.
 
 ## Tokens
 
@@ -18,6 +20,7 @@ the tokens and the font, not the components.
 | `success`, `warning`, `destructive` (+ `-text`, `-soft`) | statuses                                                  |
 | `border`, `border-strong`, `ring`                        | lines and the focus ring                                  |
 | `chart-1` … `chart-5`                                    | the series of the charts                                  |
+| `brand-from`, `brand-to`, `brand-foreground`             | the brand gradient and the text on it (marks, display)    |
 
 Materials are utilities (`src/styles/surfaces.css`): `surface` (a card), `well` (sunk into a surface: inputs,
 tracks, chips) and `raised` (standing out of it: the thumb of a segmented control).
@@ -29,6 +32,20 @@ without checking fails there. The same tool checks that the `theme-color` of `ap
 
 To rebrand: change the values of `tokens.css` (keep the names), the fonts in the root layouts, `app/icon.svg` and
 `config/site.ts`; run `npm run contrast`.
+
+## Brand
+
+`src/styles/brand.css` turns the brand tokens into three utilities:
+
+- `bg-brand`: the gradient as a fill, for the mark of the product and small badges; text on it is
+  `text-brand-foreground`.
+- `text-brand`: the gradient as the color of display words (the second half of the hero title, a big number). The ends
+  of the gradient are made for large type, so body text and labels keep the roles.
+- `brand-backdrop`: the ground behind a hero or the sign-in card, a faint grid that fades out and two blurred glows.
+  `<div aria-hidden className="brand-backdrop" />` goes first inside a `relative isolate` parent.
+
+The default accent is `rose`, so a page without the `data-accent` attribute already wears the brand; `neutral` is one
+of the six choices like the others.
 
 ## Appearance
 

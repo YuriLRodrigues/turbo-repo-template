@@ -5,7 +5,7 @@ import { HOUR, TEST_NOW } from '../time/fake-clock'
 import { api, clockOf, createAccount, createTestApp, signIn, type TestApp } from './create-test-app'
 
 const DEFAULT_PREFERENCES = {
-  appearance: { theme: 'system', accent: 'neutral', density: 'comfortable', reduceMotion: false },
+  appearance: { theme: 'system', accent: 'rose', density: 'comfortable', reduceMotion: false },
   timeZone: 'UTC',
   onboarding: { status: 'pending', currentStep: 'welcome', completedSteps: [], skippedSteps: [] },
   updatedAt: null,

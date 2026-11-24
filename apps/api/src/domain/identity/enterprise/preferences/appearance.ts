@@ -20,7 +20,7 @@ export type Appearance = {
 
 export const DEFAULT_APPEARANCE: Appearance = {
   theme: 'system',
-  accent: 'neutral',
+  accent: 'rose',
   density: 'comfortable',
   reduceMotion: false,
 }

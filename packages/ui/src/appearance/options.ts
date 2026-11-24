@@ -26,7 +26,7 @@ export type Appearance = {
 
 export const DEFAULT_APPEARANCE: Appearance = {
   theme: 'system',
-  accent: 'neutral',
+  accent: 'rose',
   density: 'comfortable',
   reduceMotion: false,
 }
@@ -48,4 +48,4 @@ export const DENSITY_LABELS: Record<Density, string> = { comfortable: 'Comfortab
  * `--bg-base` of each theme as sRGB, for `<meta name="theme-color">` (the browser and the system bars take the color
  * of the page). tooling/contrast-check.mjs fails when one of them drifts from tokens.css.
  */
-export const THEME_COLORS: Record<Theme, string> = { light: '#fafafa', dark: '#0b0b0b' }
+export const THEME_COLORS: Record<Theme, string> = { light: '#fafafa', dark: '#09090c' }

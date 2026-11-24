@@ -23,3 +23,5 @@ npm run contrast                       # from the root: every text token on ever
 5. A frame that holds something wide is `min-w-0` (`Card`, `ChartFrame`), and nothing scrolls through a raw overflow
    class (`ScrollArea`, `ArrowScrollArea`).
 6. Pure helpers that are not about React or the DOM belong to `@workspace/utils`.
+7. The brand is `bg-brand`, `text-brand` and `brand-backdrop` (`src/styles/brand.css`), on the `--brand-*` tokens:
+   marks, display words and the ground behind a hero. Body text and controls use the roles (`primary`, `muted`...).

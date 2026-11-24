@@ -1,0 +1,49 @@
+/*
+ * The brand as utilities, all on the tokens of tokens.css (--brand-from, --brand-to, --brand-foreground, --grid-line):
+ *
+ * - `bg-brand`: the gradient of the brand, for marks and small badges (text on it is `text-brand-foreground`).
+ * - `text-brand`: the gradient as the color of display words (a hero title, a big number). Not for body text: the
+ *   ends of the gradient are made for large type.
+ * - `brand-backdrop`: what sits behind a hero or the sign-in card, a faint grid that fades out and two blurred glows.
+ *   Put `<div aria-hidden className="brand-backdrop" />` first inside a `relative isolate` parent.
+ */
+@utility bg-brand {
+  background-image: linear-gradient(135deg, var(--brand-from), var(--brand-to));
+}
+
+@utility text-brand {
+  background-image: linear-gradient(92deg, var(--brand-from), var(--brand-to));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@layer components {
+  .brand-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .brand-backdrop::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(75% 65% at 50% 0%, #000 25%, transparent 80%);
+  }
+  .brand-backdrop::after {
+    content: '';
+    position: absolute;
+    inset: -25% -10% auto;
+    height: 80%;
+    background:
+      radial-gradient(38% 55% at 78% 35%, color-mix(in oklch, var(--brand-from) 30%, transparent), transparent 70%),
+      radial-gradient(38% 55% at 18% 15%, color-mix(in oklch, var(--brand-to) 26%, transparent), transparent 70%);
+    filter: blur(48px);
+  }
+}
